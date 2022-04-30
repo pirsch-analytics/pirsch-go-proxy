@@ -6,14 +6,13 @@ RUN apt-get update && \
 WORKDIR /go/src/pirsch-go-proxy
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-s -w" /go/src/pirsch-go-proxy/main.go && \
-    mkdir /app && \
-	mv main /app/server
-
 RUN cd /go/src/pirsch-go-proxy/js && \
     bash -c "npm i" && \
     bash -c "npm run build"
-RUN mv /go/src/pirsch-go-proxy/js /app/js
+
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-s -w" /go/src/pirsch-go-proxy/main.go && \
+    mkdir /app && \
+	mv main /app/server
 
 FROM alpine
 RUN apk update && \

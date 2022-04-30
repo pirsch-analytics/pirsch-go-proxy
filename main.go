@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"github.com/BurntSushi/toml"
 	"github.com/NYTimes/gziphandler"
@@ -10,6 +11,7 @@ import (
 	"github.com/pirsch-analytics/pirsch-go-sdk"
 	"github.com/rs/cors"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"os/signal"
@@ -20,6 +22,9 @@ import (
 var (
 	config  Config
 	clients []*pirsch.Client
+
+	//go:embed js
+	static embed.FS
 )
 
 type Config struct {
@@ -86,7 +91,13 @@ func setupClients() {
 func configureRoutes(router *mux.Router) {
 	router.HandleFunc("/pirsch/hit", hit)
 	router.HandleFunc("/pirsch/event", event)
-	router.PathPrefix("/pirsch/").Handler(http.StripPrefix("/pirsch/", gziphandler.GzipHandler(http.FileServer(http.Dir("js")))))
+	sub, err := fs.Sub(static, "js")
+
+	if err != nil {
+		logbuch.Fatal("Error creating sub file system for static files", logbuch.Fields{"err": err})
+	}
+
+	router.PathPrefix("/pirsch/").Handler(http.StripPrefix("/pirsch/", gziphandler.GzipHandler(http.FileServer(http.FS(sub)))))
 }
 
 func hit(w http.ResponseWriter, r *http.Request) {
