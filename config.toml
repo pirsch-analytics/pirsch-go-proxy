@@ -1,11 +1,23 @@
-base_url = "http://localhost.com:9999"
+# The base URL is used for testing purposes only.
+#base_url = "http://localhost.com:9999"
 
+# Proxy server configuration.
+# You should use a TLS certificate or run it behind a reverse proxy that queries a certificate for you.
 [server]
-host = ":2345"
+host = ":80"
 write_timeout = 5
 read_timeout = 5
+#tls = true
+#tls_cert = "path/to/cert_file"
+#tls_key = "path/to/key_file
 
+# List of clients to send data to.
 [[clients]]
-    id = "zDgQ95gmKy4lPm27n4K6AR17yT9SKe9l"
-    secret = "osHgq5FJx5b2KWg0lwwQFl5xz1H5E6O8n1JmLAOOBfqbnVmJulQ5cPqnLXMRUstm"
-    hostname = "localhost.com"
+    id = "your-client-id"
+    secret = "your-client-secret"
+    hostname = "example.com"
+
+#[[clients]]
+#    id = "your-client-id"
+#    secret = "your-client-secret"
+#    hostname = "example.com"
