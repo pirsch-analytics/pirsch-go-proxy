@@ -2,19 +2,24 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/BurntSushi/toml"
 	"github.com/NYTimes/gziphandler"
 	"github.com/emvi/logbuch"
 	"github.com/gorilla/mux"
+	"github.com/pirsch-analytics/pirsch-go-sdk"
 	"github.com/rs/cors"
+	"io"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"time"
 )
 
 var (
-	config Config
+	config  Config
+	clients []*pirsch.Client
 )
 
 type Config struct {
@@ -63,6 +68,21 @@ func loadConfig() {
 	}
 }
 
+func setupClients() {
+	for _, c := range config.Clients {
+		logbuch.Info("Adding client", logbuch.Fields{"hostname": c.Hostname, "id": c.ID, "base_url": config.BaseURL})
+		client := pirsch.NewClient(c.ID, c.Secret, c.Hostname, &pirsch.ClientConfig{
+			BaseURL: config.BaseURL,
+		})
+
+		if _, err := client.Domain(); err != nil {
+			logbuch.Fatal("Error connecting client", logbuch.Fields{"err": err})
+		}
+
+		clients = append(clients, client)
+	}
+}
+
 func configureRoutes(router *mux.Router) {
 	router.HandleFunc("/pirsch/hit", hit)
 	router.HandleFunc("/pirsch/event", event)
@@ -70,11 +90,79 @@ func configureRoutes(router *mux.Router) {
 }
 
 func hit(w http.ResponseWriter, r *http.Request) {
-	logbuch.Info("hit")
+	query := r.URL.Query()
+	width, _ := strconv.ParseInt(query.Get("w"), 10, 16)
+	height, _ := strconv.ParseInt(query.Get("h"), 10, 16)
+	options := &pirsch.HitOptions{
+		URL:            query.Get("url"),
+		IP:             r.RemoteAddr,
+		CFConnectingIP: r.Header.Get("CF-Connecting-IP"),
+		XForwardedFor:  r.Header.Get("X-Forwarded-For"),
+		Forwarded:      r.Header.Get("Forwarded"),
+		XRealIP:        r.Header.Get("X-Real-IP"),
+		UserAgent:      r.Header.Get("User-Agent"),
+		AcceptLanguage: r.Header.Get("Accept-Language"),
+		Title:          query.Get("t"),
+		Referrer:       query.Get("ref"),
+		ScreenWidth:    int(width),
+		ScreenHeight:   int(height),
+	}
+
+	for _, client := range clients {
+		if err := client.HitWithOptions(r, options); err != nil {
+			logbuch.Error("Error sending hit", logbuch.Fields{"err": err})
+			w.WriteHeader(http.StatusInternalServerError)
+			break
+		}
+	}
 }
 
 func event(w http.ResponseWriter, r *http.Request) {
-	logbuch.Info("event")
+	body, err := io.ReadAll(r.Body)
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	e := struct {
+		URL           string            `json:"url"`
+		Title         string            `json:"title"`
+		Referrer      string            `json:"referrer"`
+		ScreenWidth   int               `json:"screen_width"`
+		ScreenHeight  int               `json:"screen_height"`
+		EventName     string            `json:"event_name"`
+		EventDuration int               `json:"event_duration"`
+		EventMeta     map[string]string `json:"event_meta"`
+	}{}
+
+	if err := json.Unmarshal(body, &e); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	options := &pirsch.HitOptions{
+		URL:            e.URL,
+		IP:             r.RemoteAddr,
+		CFConnectingIP: r.Header.Get("CF-Connecting-IP"),
+		XForwardedFor:  r.Header.Get("X-Forwarded-For"),
+		Forwarded:      r.Header.Get("Forwarded"),
+		XRealIP:        r.Header.Get("X-Real-IP"),
+		UserAgent:      r.Header.Get("User-Agent"),
+		AcceptLanguage: r.Header.Get("Accept-Language"),
+		Title:          e.Title,
+		Referrer:       e.Referrer,
+		ScreenWidth:    e.ScreenWidth,
+		ScreenHeight:   e.ScreenHeight,
+	}
+
+	for _, client := range clients {
+		if err := client.EventWithOptions(e.EventName, e.EventDuration, e.EventMeta, r, options); err != nil {
+			logbuch.Error("Error sending event", logbuch.Fields{"err": err})
+			w.WriteHeader(http.StatusInternalServerError)
+			break
+		}
+	}
 }
 
 func configureCors(router *mux.Router) http.Handler {
@@ -131,6 +219,7 @@ func startServer(handler http.Handler) {
 func main() {
 	configureLogging()
 	loadConfig()
+	setupClients()
 	router := mux.NewRouter()
 	configureRoutes(router)
 	startServer(configureCors(router))
