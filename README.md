@@ -82,7 +82,7 @@ This will make the `pirsch` event function available on your site.
 <script defer type="text/javascript" src="/pirsch/pirsch-events.min.js" id="pirscheventsjs"></script>
 ```
 
-If you have installed on a different domain or subdomain, adjust the `src` and endpoints using the `data-endpoint` parameters.
+If you have installed it on a different domain or subdomain, adjust `src` and the endpoints using the `data-endpoint` parameters.
 
 ```JavaScript
 <script defer type="text/javascript"
