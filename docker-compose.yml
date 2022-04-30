@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  pirsch-proxy:
+    image: pirsch/proxy
+    container_name: pirsch-proxy
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config.toml:/app/config.toml

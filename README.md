@@ -49,7 +49,17 @@ The proxy will send all page views and events to all clients configured. So, if 
 Alternatively you can use Docker to install the proxy. Here is a docker-compose to deploy it.
 
 ```yaml
-TODO
+version: "3"
+
+services:
+  pirsch-proxy:
+    image: pirsch/proxy
+    container_name: pirsch-proxy
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config.toml:/app/config.toml
 ```
 
 ## Usage
