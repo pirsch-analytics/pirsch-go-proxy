@@ -10,7 +10,9 @@ fi
 mkdir -p pirsch
 cd js && npm i && npm run build && cd ..
 CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-s -w" main.go
-cp main pirsch/pirsch-proxy
+CGO_ENABLED=0 GOOS=windows go build -a -installsuffix cgo -ldflags "-s -w" main.go
+mv main pirsch/pirsch-proxy
+mv main.exe pirsch/pirsch-proxy.exe
 cp config.toml pirsch
 
 zip -r "pirsch_proxy_v$1.zip" pirsch

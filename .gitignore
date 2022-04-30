@@ -2,3 +2,6 @@
 js/node_modules/
 js/pirsch.min.js
 js/pirsch-events.min.js
+pirsch_*.zip
+main
+main.exe
