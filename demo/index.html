@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pirsch Proxy Demo</title>
+    <script defer type="text/javascript"
+            src="http://localhost.com:2345/pirsch/pirsch.min.js"
+            id="pirschjs"
+            data-endpoint="http://localhost.com:2345/pirsch/hit"></script>
+    <script defer type="text/javascript"
+            src="http://localhost.com:2345/pirsch/pirsch-events.min.js"
+            id="pirscheventsjs"
+            data-endpoint="http://localhost.com:2345/pirsch/event"></script>
+</head>
+<body>
+    <h1>Welcome to the Pirsch Proxy Demo!</h1>
+    <p>You should now see a page view on your dashboard. If you don't, it's probably to wrong or missing configuration on the proxy.</p>
+    <button id="button">Send Event</button>
+
+    <script type="text/javascript">
+        const button = document.getElementById("button");
+        button.addEventListener("click", () => {
+            pirsch("Proxy Event", {
+                meta: {
+                    metadata: "This is a metadata field!"
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "pirsch-go-proxy",
+  "version": "1.0.0",
+  "description": "A self-hosted proxy for the Pirsch Analytics JavaScript snippet.",
+  "main": "pirsch.js",
+  "scripts": {
+    "build": "uglifyjs -c -m -o pirsch.min.js pirsch.js && uglifyjs -c -m -o pirsch-events.min.js pirsch-events.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pirsch-analytics/pirsch-go-proxy.git"
+  },
+  "author": "Emvi Software GmbH",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pirsch-analytics/pirsch-go-proxy/issues"
+  },
+  "homepage": "https://github.com/pirsch-analytics/pirsch-go-proxy#readme",
+  "devDependencies": {
+    "uglify-js": "^3.15.4"
+  }
+}

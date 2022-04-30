@@ -1,0 +1,10 @@
+[server]
+host = ":2345"
+write_timeout = 5
+read_timeout = 5
+
+clients = [
+    {id = "tztTl3bNgT4bDzfNiHM1cOWsIXfLK68v", secret = "F1ih4BOoQ1rIKNwOCEK6OcRoSkl8hQmV8tUZd792Q37MAlfXZwPF4Y9Q4Vn4h1al", hostname = "localhost.com"}
+]
+
+base_url = "http://localhost:9999"
