@@ -13,9 +13,6 @@ Additionally, you can create rollup views and send data to multiple dashboards w
 Download the latest release archive from the release section on GitHub and extract it onto your server. Adjust the pirsch/config.toml file to your needs.
 
 ```toml
-# The base URL is used for testing purposes only.
-#base_url = "http://localhost.com:9999"
-
 # Proxy server configuration.
 # You should use a TLS certificate or run it behind a reverse proxy that queries a certificate for you.
 [server]
@@ -27,6 +24,7 @@ read_timeout = 5
 #tls_key = "path/to/key_file
 
 # List of clients to send data to.
+# The client ID can be left empty if you use an access token instead of oAuth.
 [[clients]]
     id = "your-client-id"
     secret = "your-client-secret"
