@@ -1,4 +1,4 @@
-package main
+package proxy
 
 import (
 	"github.com/BurntSushi/toml"
@@ -35,14 +35,17 @@ type Network struct {
 	Subnets []string `toml:"subnets"`
 }
 
-func loadConfig() {
+// LoadConfig loads the configuration.
+func LoadConfig() *Config {
 	data, err := os.ReadFile("config.toml")
 
 	if err != nil {
 		logbuch.Fatal("Error loading configuration", logbuch.Fields{"err": err})
 	}
 
-	if err := toml.Unmarshal(data, &config); err != nil {
+	config := new(Config)
+
+	if err := toml.Unmarshal(data, config); err != nil {
 		logbuch.Fatal("Error loading configuration", logbuch.Fields{"err": err})
 	}
 
@@ -54,11 +57,12 @@ func loadConfig() {
 		config.Server.ReadTimeout = 5
 	}
 
-	loadIPHeader()
-	loadSubnets()
+	loadIPHeader(config)
+	loadSubnets(config)
+	return config
 }
 
-func loadIPHeader() {
+func loadIPHeader(config *Config) {
 	for _, header := range config.Network.Header {
 		found := false
 
@@ -76,7 +80,7 @@ func loadIPHeader() {
 	}
 }
 
-func loadSubnets() {
+func loadSubnets(config *Config) {
 	for _, subnet := range config.Network.Subnets {
 		_, n, err := net.ParseCIDR(subnet)
 

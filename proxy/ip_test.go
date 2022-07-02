@@ -1,4 +1,4 @@
-package main
+package proxy
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -87,32 +87,32 @@ func TestGetIP(t *testing.T) {
 	r.RemoteAddr = "123.456.789.012:29302"
 
 	// no header, default
-	assert.Equal(t, "123.456.789.012", getIP(r))
+	assert.Equal(t, "123.456.789.012", GetIP(r))
 
 	// X-Real-IP
 	r.Header.Set("X-Real-IP", "103.0.53.43")
-	assert.Equal(t, "103.0.53.43", getIP(r))
+	assert.Equal(t, "103.0.53.43", GetIP(r))
 
 	// Forwarded
 	r.Header.Set("Forwarded", "for=192.0.2.60;proto=http;by=203.0.113.43")
-	assert.Equal(t, "192.0.2.60", getIP(r))
+	assert.Equal(t, "192.0.2.60", GetIP(r))
 
 	// X-Forwarded-For
 	r.Header.Set("X-Forwarded-For", "127.0.0.1, 23.21.45.67, 65.182.89.102")
-	assert.Equal(t, "65.182.89.102", getIP(r))
+	assert.Equal(t, "65.182.89.102", GetIP(r))
 
 	// True-Client-IP
 	r.Header.Set("True-Client-IP", "127.0.0.1, 23.21.45.67, 65.182.89.102")
-	assert.Equal(t, "65.182.89.102", getIP(r))
+	assert.Equal(t, "65.182.89.102", GetIP(r))
 
 	// CF-Connecting-IP
 	r.Header.Set("CF-Connecting-IP", "127.0.0.1, 23.21.45.67, 65.182.89.102")
-	assert.Equal(t, "65.182.89.102", getIP(r))
+	assert.Equal(t, "65.182.89.102", GetIP(r))
 
 	// no parser
 	ipHeader = nil
 	r.Header.Set("CF-Connecting-IP", "127.0.0.1, 23.21.45.67, 65.182.89.102")
-	assert.Equal(t, "123.456.789.012", getIP(r))
+	assert.Equal(t, "123.456.789.012", GetIP(r))
 }
 
 func TestGetIPWithProxy(t *testing.T) {
@@ -135,37 +135,37 @@ func TestGetIPWithProxy(t *testing.T) {
 	r.RemoteAddr = "10.0.0.8:29302"
 
 	// no header, default
-	assert.Equal(t, "10.0.0.8", getIP(r))
+	assert.Equal(t, "10.0.0.8", GetIP(r))
 
 	// X-Real-IP
 	r.Header.Set("X-Real-IP", "103.0.53.43")
-	assert.Equal(t, "103.0.53.43", getIP(r))
+	assert.Equal(t, "103.0.53.43", GetIP(r))
 
 	// Forwarded
 	r.Header.Set("Forwarded", "for=192.0.2.60;proto=http;by=203.0.113.43")
-	assert.Equal(t, "192.0.2.60", getIP(r))
+	assert.Equal(t, "192.0.2.60", GetIP(r))
 
 	// X-Forwarded-For
 	r.Header.Set("X-Forwarded-For", "127.0.0.1, 23.21.45.67, 65.182.89.102")
-	assert.Equal(t, "65.182.89.102", getIP(r))
+	assert.Equal(t, "65.182.89.102", GetIP(r))
 
 	// True-Client-IP
 	r.Header.Set("True-Client-IP", "127.0.0.1, 23.21.45.67, 65.182.89.102")
-	assert.Equal(t, "65.182.89.102", getIP(r))
+	assert.Equal(t, "65.182.89.102", GetIP(r))
 
 	// CF-Connecting-IP
 	r.Header.Set("CF-Connecting-IP", "127.0.0.1, 23.21.45.67, 65.182.89.102")
-	assert.Equal(t, "65.182.89.102", getIP(r))
+	assert.Equal(t, "65.182.89.102", GetIP(r))
 
 	// no parser
 	ipHeader = nil
 	r.Header.Set("CF-Connecting-IP", "127.0.0.1, 23.21.45.67, 65.182.89.102")
-	assert.Equal(t, "10.0.0.8", getIP(r))
+	assert.Equal(t, "10.0.0.8", GetIP(r))
 
 	// invalid remote IP
 	r.RemoteAddr = "1.1.1.1"
 	r.Header.Set("CF-Connecting-IP", "127.0.0.1, 23.21.45.67, 65.182.89.102")
-	assert.Equal(t, "1.1.1.1", getIP(r))
+	assert.Equal(t, "1.1.1.1", GetIP(r))
 }
 
 func TestIsValidIP(t *testing.T) {

@@ -7,6 +7,7 @@ import (
 	"github.com/NYTimes/gziphandler"
 	"github.com/emvi/logbuch"
 	"github.com/gorilla/mux"
+	"github.com/pirsch-analytics/pirsch-go-proxy/proxy"
 	"github.com/pirsch-analytics/pirsch-go-sdk"
 	"github.com/rs/cors"
 	"io"
@@ -19,7 +20,7 @@ import (
 )
 
 var (
-	config  Config
+	config  *proxy.Config
 	clients []*pirsch.Client
 
 	//go:embed js
@@ -64,7 +65,7 @@ func hit(w http.ResponseWriter, r *http.Request) {
 	height, _ := strconv.ParseInt(query.Get("h"), 10, 16)
 	options := &pirsch.HitOptions{
 		URL:            query.Get("url"),
-		IP:             getIP(r),
+		IP:             proxy.GetIP(r),
 		UserAgent:      r.Header.Get("User-Agent"),
 		AcceptLanguage: r.Header.Get("Accept-Language"),
 		Title:          query.Get("t"),
@@ -108,7 +109,7 @@ func event(w http.ResponseWriter, r *http.Request) {
 
 	options := &pirsch.HitOptions{
 		URL:            e.URL,
-		IP:             getIP(r),
+		IP:             proxy.GetIP(r),
 		UserAgent:      r.Header.Get("User-Agent"),
 		AcceptLanguage: r.Header.Get("Accept-Language"),
 		Title:          e.Title,
@@ -179,7 +180,7 @@ func startServer(handler http.Handler) {
 
 func main() {
 	configureLogging()
-	loadConfig()
+	config = proxy.LoadConfig()
 	setupClients()
 	router := mux.NewRouter()
 	configureRoutes(router)

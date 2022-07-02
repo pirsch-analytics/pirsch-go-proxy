@@ -1,4 +1,4 @@
-package main
+package proxy
 
 import (
 	"net"
@@ -31,7 +31,8 @@ type headerParser struct {
 	Parser parseHeaderFunc
 }
 
-func getIP(r *http.Request) string {
+// GetIP returns the real visitor IP for the request.
+func GetIP(r *http.Request) string {
 	ip := cleanIP(r.RemoteAddr)
 
 	if allowedSubnets != nil && !validProxySource(ip, allowedSubnets) {
