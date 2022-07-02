@@ -82,6 +82,7 @@ func TestParseXRealIPHeader(t *testing.T) {
 
 func TestGetIP(t *testing.T) {
 	ipHeader = allIPHeader
+	allowedSubnets = nil
 	r := httptest.NewRequest("GET", "/", nil)
 	r.RemoteAddr = "123.456.789.012:29302"
 
