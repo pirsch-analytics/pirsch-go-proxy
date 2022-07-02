@@ -4,7 +4,6 @@ import (
 	"context"
 	"embed"
 	"encoding/json"
-	"github.com/BurntSushi/toml"
 	"github.com/NYTimes/gziphandler"
 	"github.com/emvi/logbuch"
 	"github.com/gorilla/mux"
@@ -27,50 +26,9 @@ var (
 	static embed.FS
 )
 
-type Config struct {
-	Server  Server   `toml:"server"`
-	Clients []Client `toml:"clients"`
-	BaseURL string   `toml:"base_url"`
-}
-
-type Server struct {
-	Host         string `toml:"host"`
-	WriteTimeout int    `toml:"write_timeout"`
-	ReadTimeout  int    `toml:"read_timeout"`
-	TLS          bool   `toml:"tls"`
-	TLSCert      string `toml:"tls_cert"`
-	TLSKey       string `toml:"tls_key"`
-}
-
-type Client struct {
-	ID       string `toml:"id"`
-	Secret   string `toml:"secret"`
-	Hostname string `toml:"hostname"`
-}
-
 func configureLogging() {
 	logbuch.SetFormatter(logbuch.NewFieldFormatter("2006-01-02_15:04:05", "\t"))
 	logbuch.SetLevel(logbuch.LevelInfo)
-}
-
-func loadConfig() {
-	data, err := os.ReadFile("config.toml")
-
-	if err != nil {
-		logbuch.Fatal("Error loading configuration", logbuch.Fields{"err": err})
-	}
-
-	if err := toml.Unmarshal(data, &config); err != nil {
-		logbuch.Fatal("Error loading configuration", logbuch.Fields{"err": err})
-	}
-
-	if config.Server.WriteTimeout == 0 {
-		config.Server.WriteTimeout = 5
-	}
-
-	if config.Server.ReadTimeout == 0 {
-		config.Server.ReadTimeout = 5
-	}
 }
 
 func setupClients() {
@@ -106,11 +64,7 @@ func hit(w http.ResponseWriter, r *http.Request) {
 	height, _ := strconv.ParseInt(query.Get("h"), 10, 16)
 	options := &pirsch.HitOptions{
 		URL:            query.Get("url"),
-		IP:             r.RemoteAddr,
-		CFConnectingIP: r.Header.Get("CF-Connecting-IP"),
-		XForwardedFor:  r.Header.Get("X-Forwarded-For"),
-		Forwarded:      r.Header.Get("Forwarded"),
-		XRealIP:        r.Header.Get("X-Real-IP"),
+		IP:             getIP(r),
 		UserAgent:      r.Header.Get("User-Agent"),
 		AcceptLanguage: r.Header.Get("Accept-Language"),
 		Title:          query.Get("t"),
@@ -154,11 +108,7 @@ func event(w http.ResponseWriter, r *http.Request) {
 
 	options := &pirsch.HitOptions{
 		URL:            e.URL,
-		IP:             r.RemoteAddr,
-		CFConnectingIP: r.Header.Get("CF-Connecting-IP"),
-		XForwardedFor:  r.Header.Get("X-Forwarded-For"),
-		Forwarded:      r.Header.Get("Forwarded"),
-		XRealIP:        r.Header.Get("X-Real-IP"),
+		IP:             getIP(r),
 		UserAgent:      r.Header.Get("User-Agent"),
 		AcceptLanguage: r.Header.Get("Accept-Language"),
 		Title:          e.Title,

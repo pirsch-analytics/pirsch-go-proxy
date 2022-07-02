@@ -16,12 +16,22 @@ Download the latest release archive from the release section on GitHub and extra
 # Proxy server configuration.
 # You should use a TLS certificate or run it behind a reverse proxy that queries a certificate for you.
 [server]
-host = ":80"
-write_timeout = 5
-read_timeout = 5
-#tls = true
-#tls_cert = "path/to/cert_file"
-#tls_key = "path/to/key_file
+    host = ":80"
+    write_timeout = 5
+    read_timeout = 5
+    #tls = true
+    #tls_cert = "path/to/cert_file"
+    #tls_key = "path/to/key_file
+
+# Proxy network configuration.
+# This configuration can be used to retreive the real client IP address and set accepted subnets for proxies or load balancers in front of this proxy.
+[network]
+    # Parsed in order, allowed values: CF-Connecting-IP, True-Client-IP, X-Forwarded-For, Forwarded, X-Real-IP
+    # The proxy will use the remote IP if no header is configured.
+    header = ["X-Forwarded-For", "Forwarded"]
+
+    # List of CIDR.
+    subnets = ["10.0.0.0/8"]
 
 # List of clients to send data to.
 # The client ID can be left empty if you use an access token instead of oAuth.
