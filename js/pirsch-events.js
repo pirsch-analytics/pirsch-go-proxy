@@ -61,18 +61,7 @@
                 }
             }
 
-            const req = new XMLHttpRequest();
-            req.open("POST", endpoint);
-            req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            req.onload = () => {
-                if (req.status >= 200 && req.status < 300) {
-                    resolve(req.response);
-                } else {
-                    reject(req.statusText);
-                }
-            };
-            req.onerror = () => reject(req.statusText);
-            req.send(JSON.stringify({
+            if (navigator.sendBeacon(endpoint, JSON.stringify({
                 url: location.href.substring(0, 1800),
                 title: document.title,
                 referrer: document.referrer,
@@ -81,7 +70,11 @@
                 event_name: name,
                 event_duration: options && options.duration && typeof options.duration === "number" ? options.duration : 0,
                 event_meta: meta
-            }));
+            }))) {
+                resolve();
+            } else {
+                reject("error queuing event request");
+            }
         });
     }
 })();

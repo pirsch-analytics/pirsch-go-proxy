@@ -1,5 +1,10 @@
 ## Changelog
 
+## 1.2.0
+
+* events are now send asynchronously, so it’s no longer required to wait for the request to go through before switching the page
+* updated dependencies
+
 ## 1.1.1
 
 * fixed imports
@@ -17,4 +22,4 @@
 
 ## 0.1-beta
 
-Inital release.
+Initial release.

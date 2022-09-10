@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/pirsch-analytics/pirsch-go-proxy#readme",
   "devDependencies": {
-    "uglify-js": "^3.16.1"
+    "uglify-js": "^3.17.0"
   }
 }
