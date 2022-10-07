@@ -47,15 +47,18 @@
 
     // register hit function
     const endpoint = script.getAttribute("data-endpoint") || "/pirsch/hit";
+    const disableQueryParams = script.hasAttribute("data-disable-query");
+    const disableReferrer = script.hasAttribute("data-disable-referrer");
+    const disableResolution = script.hasAttribute("data-disable-resolution");
 
     function hit() {
         const url = endpoint +
             "?nc=" + new Date().getTime() +
-            "&url=" + encodeURIComponent(location.href.substring(0, 1800)) +
+            "&url=" + encodeURIComponent(disableQueryParams ? (location.href.includes('?') ? location.href.split('?')[0] : location.href).substring(0, 1800) : location.href.substring(0, 1800)) +
             "&t=" + encodeURIComponent(document.title) +
-            "&ref=" + encodeURIComponent(document.referrer) +
-            "&w=" + screen.width +
-            "&h=" + screen.height;
+            "&ref=" + (disableReferrer ? '' : encodeURIComponent(document.referrer)) +
+            "&w=" + (disableResolution ? '' : screen.width) +
+            "&h=" + (disableResolution ? '' : screen.height);
         const req = new XMLHttpRequest();
         req.open("GET", url);
         req.send();
