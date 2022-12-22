@@ -90,6 +90,14 @@ This will make the `pirsch` event function available on your site.
 <script defer type="text/javascript" src="/pirsch/pirsch-events.min.js" id="pirscheventsjs"></script>
 ```
 
+**pirsch-sessions.min.js**
+
+This will extend visitor sessions.
+
+```JavaScript
+<script defer type="text/javascript" src="/pirsch/pirsch-sessions.min.js" id="pirschsessionsjs"></script>
+```
+
 If you have installed it on a different domain or subdomain, adjust `src` and the endpoints using the `data-endpoint` parameters.
 
 ```JavaScript
@@ -102,6 +110,11 @@ If you have installed it on a different domain or subdomain, adjust `src` and th
     src="https://tracking.example.com/pirsch/pirsch-events.min.js"
     id="pirscheventsjs"
     data-endpoint="https://tracking.example.com/pirsch/event"></script>
+
+<script defer type="text/javascript"
+        src="/custom/path/pirsch-sessions.min.js"
+        id="pirschsessionsjs"
+        data-endpoint="/custom/path/session.php"></script>
 ```
 
 A demo can be found in the [demo](demo) directory.
