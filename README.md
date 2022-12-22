@@ -112,9 +112,9 @@ If you have installed it on a different domain or subdomain, adjust `src` and th
     data-endpoint="https://tracking.example.com/pirsch/event"></script>
 
 <script defer type="text/javascript"
-        src="/custom/path/pirsch-sessions.min.js"
-        id="pirschsessionsjs"
-        data-endpoint="/custom/path/session.php"></script>
+    src="/custom/path/pirsch-sessions.min.js"
+    id="pirschsessionsjs"
+    data-endpoint="/custom/path/session.php"></script>
 ```
 
 A demo can be found in the [demo](demo) directory.
