@@ -50,6 +50,7 @@ func setupClients() {
 func configureRoutes(router *mux.Router) {
 	router.HandleFunc("/pirsch/hit", hit)
 	router.HandleFunc("/pirsch/event", event)
+	router.HandleFunc("/pirsch/session", session)
 	sub, err := fs.Sub(static, "js")
 
 	if err != nil {
@@ -121,6 +122,16 @@ func event(w http.ResponseWriter, r *http.Request) {
 	for _, client := range clients {
 		if err := client.EventWithOptions(e.EventName, e.EventDuration, e.EventMeta, r, options); err != nil {
 			logbuch.Error("Error sending event", logbuch.Fields{"err": err})
+			w.WriteHeader(http.StatusInternalServerError)
+			break
+		}
+	}
+}
+
+func session(w http.ResponseWriter, r *http.Request) {
+	for _, client := range clients {
+		if err := client.Session(r); err != nil {
+			logbuch.Error("Error extending session", logbuch.Fields{"err": err})
 			w.WriteHeader(http.StatusInternalServerError)
 			break
 		}

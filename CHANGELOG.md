@@ -1,5 +1,11 @@
 ## Changelog
 
+## 1.4.0
+
+* added session extensions
+* updated scripts
+* updated dependencies
+
 ## 1.3.0
 
 * updated scripts

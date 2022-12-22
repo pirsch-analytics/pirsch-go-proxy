@@ -1,62 +1,45 @@
+import {getScript, ignore, rewriteHostname, rewriteReferrer} from "./common";
+
 (function () {
     "use strict";
 
-    // respect Do-Not-Track
-    if (navigator.doNotTrack === "1" || localStorage.getItem("disable_pirsch")) {
+    const script = getScript("#pirschjs");
+
+    if(ignore(script)) {
         return;
-    }
-
-    const script = document.querySelector("#pirschjs");
-
-    // include pages
-    try {
-        const include = script.getAttribute("data-include");
-        const paths = include ? include.split(",") : [];
-
-        if (paths.length) {
-            let found = false;
-
-            for (let i = 0; i < paths.length; i++) {
-                if (new RegExp(paths[i]).test(location.pathname)) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                return;
-            }
-        }
-    } catch (e) {
-        console.error(e);
-    }
-
-    // exclude pages
-    try {
-        const exclude = script.getAttribute("data-exclude");
-        const paths = exclude ? exclude.split(",") : [];
-
-        for (let i = 0; i < paths.length; i++) {
-            if (new RegExp(paths[i]).test(location.pathname)) {
-                return;
-            }
-        }
-    } catch (e) {
-        console.error(e);
     }
 
     // register hit function
     const endpoint = script.getAttribute("data-endpoint") || "/pirsch/hit";
+    const clientID = script.getAttribute("data-client-id") || 0;
+    const domains = script.getAttribute("data-domain") ? script.getAttribute("data-domain").split(",") || [] : [];
     const disableQueryParams = script.hasAttribute("data-disable-query");
     const disableReferrer = script.hasAttribute("data-disable-referrer");
     const disableResolution = script.hasAttribute("data-disable-resolution");
+    const rewrite = script.getAttribute("data-dev");
 
     function hit() {
+        sendHit(rewrite);
+
+        for (let i = 0; i < domains.length; i++) {
+            sendHit(domains[i]);
+        }
+    }
+
+    function sendHit(hostname) {
+        const referrer = rewriteReferrer(hostname);
+        hostname = rewriteHostname(hostname);
+
+        if (disableQueryParams) {
+            hostname = (hostname.includes('?') ? hostname.split('?')[0] : hostname);
+        }
+
         const url = endpoint +
             "?nc=" + new Date().getTime() +
-            "&url=" + encodeURIComponent(disableQueryParams ? (location.href.includes('?') ? location.href.split('?')[0] : location.href).substring(0, 1800) : location.href.substring(0, 1800)) +
+            "&client_id=" + clientID +
+            "&url=" + encodeURIComponent(hostname.substring(0, 1800)) +
             "&t=" + encodeURIComponent(document.title) +
-            "&ref=" + (disableReferrer ? '' : encodeURIComponent(document.referrer)) +
+            "&ref=" + (disableReferrer ? '' : encodeURIComponent(referrer)) +
             "&w=" + (disableResolution ? '' : screen.width) +
             "&h=" + (disableResolution ? '' : screen.height);
         const req = new XMLHttpRequest();
