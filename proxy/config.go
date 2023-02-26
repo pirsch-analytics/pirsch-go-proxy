@@ -9,10 +9,11 @@ import (
 )
 
 type Config struct {
-	Server  Server   `toml:"server"`
-	Clients []Client `toml:"clients"`
-	Network Network  `toml:"network"`
-	BaseURL string   `toml:"base_url"`
+	Server   Server   `toml:"server"`
+	Clients  []Client `toml:"clients"`
+	Network  Network  `toml:"network"`
+	BaseURL  string   `toml:"base_url"`
+	BasePath string   `toml:"base_path"`
 }
 
 type Server struct {

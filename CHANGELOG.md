@@ -1,5 +1,11 @@
 ## Changelog
 
+## 1.5.0
+
+* added base path configuration option
+* removed serving script build files
+* updated dependencies
+
 ## 1.4.0
 
 * added session extensions

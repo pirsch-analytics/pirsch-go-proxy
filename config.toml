@@ -1,6 +1,10 @@
 # The base URL is used for testing purposes only.
 #base_url = "http://localhost.com:9999"
 
+# Optional base path. This will change the path the scripts and endpoints are available on.
+# The default is "/pirsch/", meaning scripts and endpoints will be available on /pirsch/pirsch.min.js, /pirsch/hit, and so on.
+#base_path = "/pirsch/"
+
 # Proxy server configuration.
 # You should use a TLS certificate or run it behind a reverse proxy that queries a certificate for you.
 [server]
@@ -12,7 +16,7 @@ read_timeout = 5
 #tls_key = "path/to/key_file
 
 # List of clients to send data to.
-# The client ID can be left empty if you use an access token instead of oAuth.
+# The client ID can be left empty if you use an access key instead of oAuth.
 [[clients]]
     id = "your-client-id"
     secret = "your-client-secret"
