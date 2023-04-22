@@ -36,7 +36,7 @@ func configureLogging() {
 func setupClients() {
 	for _, c := range config.Clients {
 		logbuch.Info("Adding client", logbuch.Fields{"hostname": c.Hostname, "id": c.ID, "base_url": config.BaseURL})
-		client := pirsch.NewClient(c.ID, c.Secret, c.Hostname, &pirsch.ClientConfig{
+		client := pirsch.NewClient(c.ID, c.Secret, &pirsch.ClientConfig{
 			BaseURL: config.BaseURL,
 		})
 
