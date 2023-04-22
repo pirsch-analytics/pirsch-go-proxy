@@ -1,5 +1,10 @@
 ## Changelog
 
+## 1.5.1
+
+* added sample network configuration
+* updated dependencies
+
 ## 1.5.0
 
 * added base path configuration option

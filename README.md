@@ -1,6 +1,6 @@
 # Pirsch Go Proxy
 
-A self-hosted proxy for the Pirsch Analytics JavaScript snippet.
+A self-hosted proxy for the Pirsch Analytics JavaScript snippets.
 
 ## Why should I use a proxy?
 
@@ -28,7 +28,7 @@ base_path = "/pirsch/"
     #tls_key = "path/to/key_file
 
 # Proxy network configuration.
-# This configuration can be used to retreive the real client IP address and set accepted subnets for proxies or load balancers in front of this proxy.
+# This configuration can be used to retreive the real client IP address and set accepted subnets for proxies and load balancers.
 [network]
     # Parsed in order, allowed values: CF-Connecting-IP, True-Client-IP, X-Forwarded-For, Forwarded, X-Real-IP
     # The proxy will use the remote IP if no header is configured.

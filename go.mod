@@ -7,8 +7,8 @@ require (
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/emvi/logbuch v1.2.0
 	github.com/gorilla/mux v1.8.0
-	github.com/pirsch-analytics/pirsch-go-sdk v1.8.0
-	github.com/rs/cors v1.8.3
+	github.com/pirsch-analytics/pirsch-go-sdk v1.9.0
+	github.com/rs/cors v1.9.0
 	github.com/stretchr/testify v1.8.2
 )
 
