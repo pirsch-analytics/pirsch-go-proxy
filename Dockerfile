@@ -1,14 +1,7 @@
-FROM golang:1.19 AS build
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh && bash nodesource_setup.sh && \
-    apt-get install -y nodejs
+FROM golang:1.20 AS build
+RUN apt update && apt upgrade -y
 WORKDIR /go/src/pirsch-go-proxy
 COPY . .
-
-RUN cd /go/src/pirsch-go-proxy/js && \
-    bash -c "npm i" && \
-    bash -c "npm run build"
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-s -w" /go/src/pirsch-go-proxy/main.go && \
     mkdir /app && \

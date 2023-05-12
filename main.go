@@ -2,30 +2,29 @@ package main
 
 import (
 	"context"
-	"embed"
 	"encoding/json"
-	"fmt"
-	"github.com/NYTimes/gziphandler"
 	"github.com/emvi/logbuch"
 	"github.com/gorilla/mux"
+	"github.com/klauspost/compress/gzhttp"
 	"github.com/pirsch-analytics/pirsch-go-proxy/proxy"
 	"github.com/pirsch-analytics/pirsch-go-sdk"
 	"github.com/rs/cors"
 	"io"
-	"io/fs"
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
+	"sync"
 	"time"
 )
 
 var (
-	config  *proxy.Config
-	clients []*pirsch.Client
-
-	//go:embed js/*.min.js
-	static embed.FS
+	config                                                             *proxy.Config
+	clients                                                            []*pirsch.Client
+	pirschJS, eventsJS, sessionsJS, extendedJS                         []byte
+	updatePirschJS, updateEventsJS, updateSessionsJS, updateExtendedJS time.Time
+	m                                                                  sync.RWMutex
 )
 
 func configureLogging() {
@@ -35,7 +34,7 @@ func configureLogging() {
 
 func setupClients() {
 	for _, c := range config.Clients {
-		logbuch.Info("Adding client", logbuch.Fields{"hostname": c.Hostname, "id": c.ID, "base_url": config.BaseURL})
+		logbuch.Info("Adding client", logbuch.Fields{"id": c.ID, "base_url": config.BaseURL})
 		client := pirsch.NewClient(c.ID, c.Secret, &pirsch.ClientConfig{
 			BaseURL: config.BaseURL,
 		})
@@ -49,25 +48,60 @@ func setupClients() {
 }
 
 func configureRoutes(router *mux.Router) {
-	basePath := config.BasePath
-
-	if basePath == "" {
-		basePath = "/pirsch/"
-	}
-
-	router.HandleFunc(fmt.Sprintf("%shit", basePath), hit)
-	router.HandleFunc(fmt.Sprintf("%sevent", basePath), event)
-	router.HandleFunc(fmt.Sprintf("%ssession", basePath), session)
-	sub, err := fs.Sub(static, "js")
-
-	if err != nil {
-		logbuch.Fatal("Error creating sub file system for static files", logbuch.Fields{"err": err})
-	}
-
-	router.PathPrefix(basePath).Handler(http.StripPrefix(basePath, gziphandler.GzipHandler(http.FileServer(http.FS(sub)))))
+	router.HandleFunc(filepath.Join(config.BasePath, config.PageViewPath), pageView)
+	router.HandleFunc(filepath.Join(config.BasePath, config.EventPath), event)
+	router.HandleFunc(filepath.Join(config.BasePath, config.SessionPath), session)
+	serveFile(router, config.JSFilename, "pirsch.js", &pirschJS, &updatePirschJS)
+	serveFile(router, config.EventsJSFilename, "pirsch-events.js", &eventsJS, &updateEventsJS)
+	serveFile(router, config.SessionsJSFilename, "pirsch-sessions.js", &sessionsJS, &updateSessionsJS)
+	serveFile(router, config.ExtendedJSFilename, "pirsch-extended.js", &extendedJS, &updateExtendedJS)
 }
 
-func hit(w http.ResponseWriter, r *http.Request) {
+func serveFile(router *mux.Router, filename, file string, content *[]byte, updateAt *time.Time) {
+	router.HandleFunc(filepath.Join(config.BasePath, filename), gzhttp.GzipHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		m.RLock()
+
+		if content == nil || updateAt.Before(time.Now()) {
+			m.RUnlock()
+
+			if err := downloadFile(file, content, updateAt); err != nil {
+				logbuch.Error("Error downloading script", logbuch.Fields{"err": err, "file": file})
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+
+			m.RLock()
+		}
+
+		defer m.RUnlock()
+
+		if _, err := w.Write(*content); err != nil {
+			logbuch.Error("Error sending script", logbuch.Fields{"err": err, "file": file})
+		}
+	})))
+}
+
+func downloadFile(file string, content *[]byte, updateAt *time.Time) error {
+	m.Lock()
+	defer m.Unlock()
+	*updateAt = time.Now().Add(time.Hour)
+	resp, err := http.Get("https://api.pirsch.io/" + file)
+
+	if err != nil {
+		return err
+	}
+
+	data, err := io.ReadAll(resp.Body)
+
+	if err != nil {
+		return err
+	}
+
+	*content = data
+	return nil
+}
+
+func pageView(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	width, _ := strconv.ParseInt(query.Get("w"), 10, 16)
 	height, _ := strconv.ParseInt(query.Get("h"), 10, 16)
@@ -84,7 +118,7 @@ func hit(w http.ResponseWriter, r *http.Request) {
 
 	for _, client := range clients {
 		if err := client.HitWithOptions(r, options); err != nil {
-			logbuch.Error("Error sending hit", logbuch.Fields{"err": err})
+			logbuch.Error("Error sending page view", logbuch.Fields{"err": err})
 			w.WriteHeader(http.StatusInternalServerError)
 			break
 		}

@@ -9,11 +9,18 @@ import (
 )
 
 type Config struct {
-	Server   Server   `toml:"server"`
-	Clients  []Client `toml:"clients"`
-	Network  Network  `toml:"network"`
-	BaseURL  string   `toml:"base_url"`
-	BasePath string   `toml:"base_path"`
+	Server             Server   `toml:"server"`
+	Clients            []Client `toml:"clients"`
+	Network            Network  `toml:"network"`
+	BaseURL            string   `toml:"base_url"`
+	BasePath           string   `toml:"base_path"`
+	PageViewPath       string   `toml:"page_view_path"`
+	EventPath          string   `toml:"event_path"`
+	SessionPath        string   `toml:"session_path"`
+	JSFilename         string   `toml:"js_filename"`
+	EventsJSFilename   string   `toml:"events_js_filename"`
+	SessionsJSFilename string   `toml:"sessions_js_filename"`
+	ExtendedJSFilename string   `toml:"extended_js_filename"`
 }
 
 type Server struct {
@@ -26,9 +33,8 @@ type Server struct {
 }
 
 type Client struct {
-	ID       string `toml:"id"`
-	Secret   string `toml:"secret"`
-	Hostname string `toml:"hostname"`
+	ID     string `toml:"id"`
+	Secret string `toml:"secret"`
 }
 
 type Network struct {
@@ -56,6 +62,38 @@ func LoadConfig() *Config {
 
 	if config.Server.ReadTimeout == 0 {
 		config.Server.ReadTimeout = 5
+	}
+
+	if config.BasePath == "" {
+		config.BasePath = "/p"
+	}
+
+	if config.PageViewPath == "" {
+		config.PageViewPath = "pv"
+	}
+
+	if config.EventPath == "" {
+		config.EventPath = "e"
+	}
+
+	if config.SessionPath == "" {
+		config.SessionPath = "s"
+	}
+
+	if config.JSFilename == "" {
+		config.JSFilename = "p.js"
+	}
+
+	if config.EventsJSFilename == "" {
+		config.EventsJSFilename = "e.js"
+	}
+
+	if config.SessionsJSFilename == "" {
+		config.SessionsJSFilename = "s.js"
+	}
+
+	if config.ExtendedJSFilename == "" {
+		config.ExtendedJSFilename = "ext.js"
 	}
 
 	loadIPHeader(config)

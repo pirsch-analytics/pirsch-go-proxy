@@ -1,8 +1,4 @@
 .idea/
-js/node_modules/
-js/pirsch.min.js
-js/pirsch-events.min.js
-js/pirsch-sessions.min.js
 pirsch_*.zip
 main
 main.exe
