@@ -8,12 +8,14 @@ else
 fi
 
 mkdir -p pirsch
-cd js && npm i && npm run build && cd ..
-CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-s -w" main.go
-CGO_ENABLED=0 GOOS=windows go build -a -installsuffix cgo -ldflags "-s -w" main.go
-mv main pirsch/pirsch-proxy
-mv main.exe pirsch/pirsch-proxy.exe
+CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-s -w" cmd/main.go
+CGO_ENABLED=0 GOOS=windows go build -a -installsuffix cgo -ldflags "-s -w" cmd/main.go
+mv main pirsch/pirschproxy
+mv main.exe pirsch/pirschproxy.exe
 cp config.toml pirsch
+cp README.md pirsch
+cp CHANGELOG.md pirsch
+cp LICENSE pirsch
 
 zip -r "pirsch_proxy_v$1.zip" pirsch
 rm -r pirsch

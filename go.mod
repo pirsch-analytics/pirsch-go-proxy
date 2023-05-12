@@ -1,14 +1,14 @@
 module github.com/pirsch-analytics/pirsch-go-proxy
 
-go 1.19
+go 1.20
 
 require (
 	github.com/BurntSushi/toml v1.2.1
-	github.com/NYTimes/gziphandler v1.1.1
 	github.com/emvi/logbuch v1.2.0
-	github.com/gorilla/mux v1.8.0
+	github.com/go-chi/chi/v5 v5.0.8
+	github.com/go-chi/cors v1.2.1
+	github.com/klauspost/compress v1.16.5
 	github.com/pirsch-analytics/pirsch-go-sdk v1.9.0
-	github.com/rs/cors v1.9.0
 	github.com/stretchr/testify v1.8.2
 )
 

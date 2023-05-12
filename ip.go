@@ -31,8 +31,7 @@ type headerParser struct {
 	Parser parseHeaderFunc
 }
 
-// GetIP returns the real visitor IP for the request.
-func GetIP(r *http.Request) string {
+func getIP(r *http.Request) string {
 	ip := cleanIP(r.RemoteAddr)
 
 	if allowedSubnets != nil && !validProxySource(ip, allowedSubnets) {

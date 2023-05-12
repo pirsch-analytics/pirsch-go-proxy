@@ -1,5 +1,17 @@
 ## Changelog
 
+## 2.0.0
+
+* added pirsch-extended.js
+* latest JavaScript files are now downloaded from pirsch.io
+* scripts now use paths without keywords blocked by ad blockers
+* paths and script filenames can now be configured
+* removed hostnames from configuration
+* snippets are now logged on startup
+* fixed using access key clients
+* upgraded to Go 1.20
+* updated dependencies
+
 ## 1.5.1
 
 * added sample network configuration
