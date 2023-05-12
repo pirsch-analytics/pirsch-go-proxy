@@ -4,20 +4,17 @@ go 1.20
 
 require (
 	github.com/BurntSushi/toml v1.2.1
-	github.com/NYTimes/gziphandler v1.1.1
 	github.com/emvi/logbuch v1.2.0
-	github.com/gorilla/mux v1.8.0
+	github.com/go-chi/chi/v5 v5.0.8
+	github.com/go-chi/cors v1.2.1
+	github.com/klauspost/compress v1.16.5
 	github.com/pirsch-analytics/pirsch-go-sdk v1.9.0
-	github.com/rs/cors v1.9.0
 	github.com/stretchr/testify v1.8.2
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emvi/null v1.3.1 // indirect
-	github.com/go-chi/chi/v5 v5.0.8 // indirect
-	github.com/go-chi/cors v1.2.1 // indirect
-	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
