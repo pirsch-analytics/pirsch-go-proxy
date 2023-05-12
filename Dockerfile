@@ -3,7 +3,7 @@ RUN apt update && apt upgrade -y
 WORKDIR /go/src/pirsch-go-proxy
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-s -w" /go/src/pirsch-go-proxy/main.go && \
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-s -w" /go/src/pirsch-go-proxy/cmd/main.go && \
     mkdir /app && \
 	mv main /app/server
 
