@@ -7,6 +7,8 @@
 * scripts now use paths without keywords blocked by ad blockers
 * paths and script filenames can now be configured
 * removed hostnames from configuration
+* snippets are now logged on startup
+* fixed using access key clients
 * upgraded to Go 1.20
 * updated dependencies
 

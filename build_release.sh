@@ -13,6 +13,9 @@ CGO_ENABLED=0 GOOS=windows go build -a -installsuffix cgo -ldflags "-s -w" main.
 mv main pirsch/pirschproxy
 mv main.exe pirsch/pirschproxy.exe
 cp config.toml pirsch
+cp README.md pirsch
+cp CHANGELOG.md pirsch
+cp LICENSE pirsch
 
 zip -r "pirsch_proxy_v$1.zip" pirsch
 rm -r pirsch

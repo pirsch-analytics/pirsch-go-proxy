@@ -1,32 +1,6 @@
-# Proxy server configuration.
-# You should use a TLS certificate or run it behind a reverse proxy that queries a certificate for you.
-[server]
-    host = ":8080"
-    write_timeout = 5
-    read_timeout = 5
-    #tls = true
-    #tls_cert = "path/to/cert_file"
-    #tls_key = "path/to/key_file
-
-# Proxy network configuration.
-# This configuration can be used to retreive the real client IP address and set accepted subnets for proxies and load balancers.
-[network]
-    # Parsed in order, allowed values: CF-Connecting-IP, True-Client-IP, X-Forwarded-For, Forwarded, X-Real-IP
-    # The proxy will use the remote IP if no header is configured.
-    header = ["CF-Connecting-IP", "True-Client-IP", "X-Forwarded-For", "Forwarded", "X-Real-IP"]
-
-    # List of CIDR.
-    #subnets = ["10.0.0.0/8"]
-
-# List of clients to send data to.
-# The client ID can be left empty if you use an access key instead of oAuth, which is what we recommend.
-#[[clients]]
-#    id = "your-client-id"
-#    secret = "your-client-secret or access-key"
-
-#[[clients]]
-#    id = "your-client-id"
-#    secret = "your-client-secret"
+# Optional base path. This will change the path the scripts and endpoints are available on.
+# The default is "/p", meaning scripts and endpoints will be available on /p/p.js, /p/pv, and so on.
+#base_path = "/p"
 
 # Path for page views, sessions, and session extensions.
 # Defaults are as configured below.
@@ -42,8 +16,35 @@
 #extended_js_filename = "ext.js"
 
 # The base URL is used for testing purposes only.
-#base_url = "http://localhost.com:9999"
+#base_url = "https://localhost.com:9999"
 
-# Optional base path. This will change the path the scripts and endpoints are available on.
-# The default is "/p", meaning scripts and endpoints will be available on /p/p.js, /p/pv, and so on.
-#base_path = "/p"
+# Proxy server configuration.
+# You should use a TLS certificate or run it behind a reverse proxy that queries a certificate for you.
+[server]
+    host = ":4556"
+    write_timeout = 5
+    read_timeout = 5
+    #tls = true
+    #tls_cert = "path/to/cert_file"
+    #tls_key = "path/to/key_file
+
+# Proxy network configuration.
+# This configuration can be used to retreive the real client IP address and set accepted subnets for proxies and load balancers.
+# Make sure you use the correct header if you are running the proxy behind another proxy or load balancer, otherwise the statistics will be inaccurate.
+[network]
+    # Parsed in order, allowed values: CF-Connecting-IP, True-Client-IP, X-Forwarded-For, Forwarded, X-Real-IP
+    # The proxy will use the remote IP if no header is configured.
+    header = ["CF-Connecting-IP", "True-Client-IP", "X-Forwarded-For", "Forwarded", "X-Real-IP"]
+
+    # List of allowed subnets (CIDR).
+    #subnets = ["10.0.0.0/8"]
+
+# List of clients to send data to.
+# The client ID can be left empty if you use an access key instead of oAuth, which is what we recommend.
+[[clients]]
+#    id = "your-client-id"
+    secret = "your-client-secret or access-key"
+
+#[[clients]]
+#    id = "your-client-id"
+#    secret = "your-client-secret or access-key"

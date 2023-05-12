@@ -1,18 +1,14 @@
-package main
+package proxy
 
 import (
-	"context"
 	"encoding/json"
 	"github.com/emvi/logbuch"
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/klauspost/compress/gzhttp"
-	"github.com/pirsch-analytics/pirsch-go-proxy/proxy"
 	"github.com/pirsch-analytics/pirsch-go-sdk"
-	"github.com/rs/cors"
 	"io"
 	"net/http"
-	"os"
-	"os/signal"
 	"path/filepath"
 	"strconv"
 	"sync"
@@ -20,44 +16,32 @@ import (
 )
 
 var (
-	config                                                             *proxy.Config
-	clients                                                            []*pirsch.Client
 	pirschJS, eventsJS, sessionsJS, extendedJS                         []byte
 	updatePirschJS, updateEventsJS, updateSessionsJS, updateExtendedJS time.Time
 	m                                                                  sync.RWMutex
 )
 
-func configureLogging() {
-	logbuch.SetFormatter(logbuch.NewFieldFormatter("2006-01-02_15:04:05", "\t"))
-	logbuch.SetLevel(logbuch.LevelInfo)
+// GetRouter sets up and returns the router.
+func GetRouter() *chi.Mux {
+	router := chi.NewRouter()
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{http.MethodGet, http.MethodPost},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+		MaxAge:           86400, // one day
+	}))
+	router.Get(filepath.Join(config.BasePath, config.PageViewPath), pageView)
+	router.Get(filepath.Join(config.BasePath, config.EventPath), event)
+	router.Get(filepath.Join(config.BasePath, config.SessionPath), session)
+	serveScript(router, config.JSFilename, "pirsch.js", &pirschJS, &updatePirschJS)
+	serveScript(router, config.EventsJSFilename, "pirsch-events.js", &eventsJS, &updateEventsJS)
+	serveScript(router, config.SessionsJSFilename, "pirsch-sessions.js", &sessionsJS, &updateSessionsJS)
+	serveScript(router, config.ExtendedJSFilename, "pirsch-extended.js", &extendedJS, &updateExtendedJS)
+	return router
 }
 
-func setupClients() {
-	for _, c := range config.Clients {
-		logbuch.Info("Adding client", logbuch.Fields{"id": c.ID, "base_url": config.BaseURL})
-		client := pirsch.NewClient(c.ID, c.Secret, &pirsch.ClientConfig{
-			BaseURL: config.BaseURL,
-		})
-
-		if _, err := client.Domain(); err != nil {
-			logbuch.Fatal("Error connecting client", logbuch.Fields{"err": err})
-		}
-
-		clients = append(clients, client)
-	}
-}
-
-func configureRoutes(router *mux.Router) {
-	router.HandleFunc(filepath.Join(config.BasePath, config.PageViewPath), pageView)
-	router.HandleFunc(filepath.Join(config.BasePath, config.EventPath), event)
-	router.HandleFunc(filepath.Join(config.BasePath, config.SessionPath), session)
-	serveFile(router, config.JSFilename, "pirsch.js", &pirschJS, &updatePirschJS)
-	serveFile(router, config.EventsJSFilename, "pirsch-events.js", &eventsJS, &updateEventsJS)
-	serveFile(router, config.SessionsJSFilename, "pirsch-sessions.js", &sessionsJS, &updateSessionsJS)
-	serveFile(router, config.ExtendedJSFilename, "pirsch-extended.js", &extendedJS, &updateExtendedJS)
-}
-
-func serveFile(router *mux.Router, filename, file string, content *[]byte, updateAt *time.Time) {
+func serveScript(router *chi.Mux, filename, file string, content *[]byte, updateAt *time.Time) {
 	router.HandleFunc(filepath.Join(config.BasePath, filename), gzhttp.GzipHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		m.RLock()
 
@@ -107,7 +91,7 @@ func pageView(w http.ResponseWriter, r *http.Request) {
 	height, _ := strconv.ParseInt(query.Get("h"), 10, 16)
 	options := &pirsch.HitOptions{
 		URL:            query.Get("url"),
-		IP:             proxy.GetIP(r),
+		IP:             getIP(r),
 		UserAgent:      r.Header.Get("User-Agent"),
 		AcceptLanguage: r.Header.Get("Accept-Language"),
 		Title:          query.Get("t"),
@@ -151,7 +135,7 @@ func event(w http.ResponseWriter, r *http.Request) {
 
 	options := &pirsch.HitOptions{
 		URL:            e.URL,
-		IP:             proxy.GetIP(r),
+		IP:             getIP(r),
 		UserAgent:      r.Header.Get("User-Agent"),
 		AcceptLanguage: r.Header.Get("Accept-Language"),
 		Title:          e.Title,
@@ -177,64 +161,4 @@ func session(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-}
-
-func configureCors(router *mux.Router) http.Handler {
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{http.MethodGet, http.MethodPost},
-		AllowedHeaders:   []string{"*"},
-		AllowCredentials: true,
-		MaxAge:           86400, // one day
-	})
-	return c.Handler(router)
-}
-
-func startServer(handler http.Handler) {
-	logbuch.Info("Starting server...", logbuch.Fields{
-		"write_timeout": config.Server.WriteTimeout,
-		"read_timeout":  config.Server.ReadTimeout,
-	})
-
-	server := &http.Server{
-		Handler:      handler,
-		Addr:         config.Server.Host,
-		WriteTimeout: time.Duration(config.Server.WriteTimeout) * time.Second,
-		ReadTimeout:  time.Duration(config.Server.ReadTimeout) * time.Second,
-	}
-
-	go func() {
-		sigint := make(chan os.Signal, 1)
-		signal.Notify(sigint, os.Interrupt)
-		<-sigint
-		logbuch.Info("Shutting down server...")
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-
-		if err := server.Shutdown(ctx); err != nil {
-			logbuch.Fatal("Error shutting down server gracefully", logbuch.Fields{"err": err})
-		}
-
-		cancel()
-	}()
-
-	if config.Server.TLS {
-		logbuch.Info("TLS enabled")
-
-		if err := server.ListenAndServeTLS(config.Server.TLSCert, config.Server.TLSKey); err != nil && err != http.ErrServerClosed {
-			logbuch.Fatal(err.Error())
-		}
-	} else {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logbuch.Fatal(err.Error())
-		}
-	}
-}
-
-func main() {
-	configureLogging()
-	config = proxy.LoadConfig()
-	setupClients()
-	router := mux.NewRouter()
-	configureRoutes(router)
-	startServer(configureCors(router))
 }

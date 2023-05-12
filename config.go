@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+var (
+	config *Config
+)
+
 type Config struct {
 	Server             Server   `toml:"server"`
 	Clients            []Client `toml:"clients"`
@@ -42,63 +46,68 @@ type Network struct {
 	Subnets []string `toml:"subnets"`
 }
 
-// LoadConfig loads the configuration.
-func LoadConfig() *Config {
+// GetConfig returns the configuration.
+func GetConfig() *Config {
+	return config
+}
+
+// LoadConfig loads the toml configuration file.
+func LoadConfig() {
 	data, err := os.ReadFile("config.toml")
 
 	if err != nil {
 		logbuch.Fatal("Error loading configuration", logbuch.Fields{"err": err})
 	}
 
-	config := new(Config)
+	cfg := new(Config)
 
-	if err := toml.Unmarshal(data, config); err != nil {
+	if err := toml.Unmarshal(data, cfg); err != nil {
 		logbuch.Fatal("Error loading configuration", logbuch.Fields{"err": err})
 	}
 
-	if config.Server.WriteTimeout == 0 {
-		config.Server.WriteTimeout = 5
+	if cfg.Server.WriteTimeout == 0 {
+		cfg.Server.WriteTimeout = 5
 	}
 
-	if config.Server.ReadTimeout == 0 {
-		config.Server.ReadTimeout = 5
+	if cfg.Server.ReadTimeout == 0 {
+		cfg.Server.ReadTimeout = 5
 	}
 
-	if config.BasePath == "" {
-		config.BasePath = "/p"
+	if cfg.BasePath == "" {
+		cfg.BasePath = "/p"
 	}
 
-	if config.PageViewPath == "" {
-		config.PageViewPath = "pv"
+	if cfg.PageViewPath == "" {
+		cfg.PageViewPath = "pv"
 	}
 
-	if config.EventPath == "" {
-		config.EventPath = "e"
+	if cfg.EventPath == "" {
+		cfg.EventPath = "e"
 	}
 
-	if config.SessionPath == "" {
-		config.SessionPath = "s"
+	if cfg.SessionPath == "" {
+		cfg.SessionPath = "s"
 	}
 
-	if config.JSFilename == "" {
-		config.JSFilename = "p.js"
+	if cfg.JSFilename == "" {
+		cfg.JSFilename = "p.js"
 	}
 
-	if config.EventsJSFilename == "" {
-		config.EventsJSFilename = "e.js"
+	if cfg.EventsJSFilename == "" {
+		cfg.EventsJSFilename = "e.js"
 	}
 
-	if config.SessionsJSFilename == "" {
-		config.SessionsJSFilename = "s.js"
+	if cfg.SessionsJSFilename == "" {
+		cfg.SessionsJSFilename = "s.js"
 	}
 
-	if config.ExtendedJSFilename == "" {
-		config.ExtendedJSFilename = "ext.js"
+	if cfg.ExtendedJSFilename == "" {
+		cfg.ExtendedJSFilename = "ext.js"
 	}
 
-	loadIPHeader(config)
-	loadSubnets(config)
-	return config
+	loadIPHeader(cfg)
+	loadSubnets(cfg)
+	config = cfg
 }
 
 func loadIPHeader(config *Config) {
