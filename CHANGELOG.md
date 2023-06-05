@@ -1,5 +1,11 @@
 ## Changelog
 
+## 2.0.1
+
+* log server host and port on startup
+* fixed event and session extension endpoint
+* fixed extended snippet in console
+
 ## 2.0.0
 
 * added pirsch-extended.js

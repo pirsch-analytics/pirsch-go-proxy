@@ -37,7 +37,7 @@ func logSnippets() {
 	fmt.Println("\npirsch-extended.js:\n")
 	fmt.Println(fmt.Sprintf(`<script defer type="text/javascript"
 	src="%s"
-	id="pirschjs"
+	id="pirschextendedjs"
 	data-hit-endpoint="%s"
 	data-event-endpoint="%s"
 	data-session-endpoint="%s"></script>`, filepath.Join(cfg.BasePath, cfg.ExtendedJSFilename), filepath.Join(cfg.BasePath, cfg.PageViewPath), filepath.Join(cfg.BasePath, cfg.EventPath), filepath.Join(cfg.BasePath, cfg.SessionPath)))
@@ -49,6 +49,7 @@ func startServer(handler http.Handler) {
 	logbuch.Info("Starting server...", logbuch.Fields{
 		"write_timeout": cfg.Server.WriteTimeout,
 		"read_timeout":  cfg.Server.ReadTimeout,
+		"host":          cfg.Server.Host,
 	})
 
 	server := &http.Server{

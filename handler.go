@@ -32,8 +32,8 @@ func GetRouter() *chi.Mux {
 		MaxAge:           86400, // one day
 	}))
 	router.Get(filepath.Join(config.BasePath, config.PageViewPath), pageView)
-	router.Get(filepath.Join(config.BasePath, config.EventPath), event)
-	router.Get(filepath.Join(config.BasePath, config.SessionPath), session)
+	router.Post(filepath.Join(config.BasePath, config.EventPath), event)
+	router.Post(filepath.Join(config.BasePath, config.SessionPath), session)
 	serveScript(router, config.JSFilename, "pirsch.js", &pirschJS, &updatePirschJS)
 	serveScript(router, config.EventsJSFilename, "pirsch-events.js", &eventsJS, &updateEventsJS)
 	serveScript(router, config.SessionsJSFilename, "pirsch-sessions.js", &sessionsJS, &updateSessionsJS)
