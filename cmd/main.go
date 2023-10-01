@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/emvi/logbuch"
-	proxy "github.com/pirsch-analytics/pirsch-go-proxy"
+	"github.com/pirsch-analytics/pirsch-go-proxy/pkg/proxy"
 	"net/http"
 	"os"
 	"os/signal"
@@ -19,22 +20,22 @@ func configureLogging() {
 
 func logSnippets() {
 	cfg := proxy.GetConfig()
-	fmt.Println("\npirsch.js:\n")
+	fmt.Println("\npirsch.js:")
 	fmt.Println(fmt.Sprintf(`<script defer type="text/javascript"
 	src="%s"
 	id="pirschjs"
 	data-endpoint="%s"></script>`, filepath.Join(cfg.BasePath, cfg.JSFilename), filepath.Join(cfg.BasePath, cfg.PageViewPath)))
-	fmt.Println("\npirsch-events.js:\n")
+	fmt.Println("\npirsch-events.js:")
 	fmt.Println(fmt.Sprintf(`<script defer type="text/javascript"
 	src="%s"
 	id="pirschjs"
 	data-endpoint="%s"></script>`, filepath.Join(cfg.BasePath, cfg.EventsJSFilename), filepath.Join(cfg.BasePath, cfg.EventPath)))
-	fmt.Println("\npirsch-sessions.js:\n")
+	fmt.Println("\npirsch-sessions.js:")
 	fmt.Println(fmt.Sprintf(`<script defer type="text/javascript"
 	src="%s"
 	id="pirschjs"
 	data-endpoint="%s"></script>`, filepath.Join(cfg.BasePath, cfg.SessionsJSFilename), filepath.Join(cfg.BasePath, cfg.SessionPath)))
-	fmt.Println("\npirsch-extended.js:\n")
+	fmt.Println("\npirsch-extended.js:")
 	fmt.Println(fmt.Sprintf(`<script defer type="text/javascript"
 	src="%s"
 	id="pirschextendedjs"
@@ -76,11 +77,11 @@ func startServer(handler http.Handler) {
 	if cfg.Server.TLS {
 		logbuch.Info("TLS enabled")
 
-		if err := server.ListenAndServeTLS(cfg.Server.TLSCert, cfg.Server.TLSKey); err != nil && err != http.ErrServerClosed {
+		if err := server.ListenAndServeTLS(cfg.Server.TLSCert, cfg.Server.TLSKey); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logbuch.Fatal(err.Error())
 		}
 	} else {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logbuch.Fatal(err.Error())
 		}
 	}

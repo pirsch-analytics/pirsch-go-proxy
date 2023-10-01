@@ -1,5 +1,14 @@
 ## Changelog
 
+## 2.1.0
+
+* added support for client hints
+* added Makefile
+* added vendoring
+* refactored package structure
+* upgraded to Go version 1.21
+* updated dependencies
+
 ## 2.0.1
 
 * log server host and port on startup
