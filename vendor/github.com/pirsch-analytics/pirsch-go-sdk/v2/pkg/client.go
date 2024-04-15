@@ -54,6 +54,8 @@ const (
 	cityEndpoint            = "/api/v1/statistics/city"
 	platformEndpoint        = "/api/v1/statistics/platform"
 	screenEndpoint          = "/api/v1/statistics/screen"
+	tagKeysEndpoint         = "/api/v1/statistics/tags"
+	tagDetailsEndpoint      = "/api/v1/statistics/tag/details"
 	keywordsEndpoint        = "/api/v1/statistics/keywords"
 )
 
@@ -110,6 +112,7 @@ type PageViewOptions struct {
 	Referrer               string
 	ScreenWidth            int
 	ScreenHeight           int
+	Tags                   map[string]string
 }
 
 // NewClient creates a new client for given client ID, client secret, hostname, and optional configuration.
@@ -541,6 +544,28 @@ func (client *Client) Screen(filter *Filter) ([]ScreenClassStats, error) {
 	return stats, nil
 }
 
+// TagKeys returns a list of tag keys.
+func (client *Client) TagKeys(filter *Filter) ([]TagStats, error) {
+	stats := make([]TagStats, 0)
+
+	if err := client.performGet(client.getStatsRequestURL(tagKeysEndpoint, filter), client.requestRetries, &stats); err != nil {
+		return nil, err
+	}
+
+	return stats, nil
+}
+
+// Tags returns a list of tag values for a given tag key.
+func (client *Client) Tags(filter *Filter) ([]TagStats, error) {
+	stats := make([]TagStats, 0)
+
+	if err := client.performGet(client.getStatsRequestURL(tagDetailsEndpoint, filter), client.requestRetries, &stats); err != nil {
+		return nil, err
+	}
+
+	return stats, nil
+}
+
 // Keywords returns the Google keywords, rank, and CTR.
 func (client *Client) Keywords(filter *Filter) ([]Keyword, error) {
 	stats := make([]Keyword, 0)
@@ -568,6 +593,7 @@ func (client *Client) getPageViewData(r *http.Request, options *PageViewOptions)
 		Referrer:               client.selectField(options.Referrer, client.getReferrerFromHeaderOrQuery(r)),
 		ScreenWidth:            options.ScreenWidth,
 		ScreenHeight:           options.ScreenHeight,
+		Tags:                   options.Tags,
 	}
 }
 
@@ -774,45 +800,49 @@ func (client *Client) requestError(url string, statusCode int, body string) erro
 func (client *Client) getStatsRequestURL(endpoint string, filter *Filter) string {
 	u := fmt.Sprintf("%s%s", client.baseURL, endpoint)
 	v := url.Values{}
-	v.Set("id", filter.DomainID)
-	v.Set("from", filter.From.Format("2006-01-02"))
-	v.Set("to", filter.To.Format("2006-01-02"))
-	v.Set("scale", string(filter.Scale))
-	v.Set("tz", filter.Timezone)
-	v.Set("path", filter.Path)
-	v.Set("entry_path", filter.EntryPath)
-	v.Set("exit_path", filter.ExitPath)
-	v.Set("pattern", filter.Pattern)
-	v.Set("event", filter.Event)
-	v.Set("event_meta_key", filter.EventMetaKey)
-	v.Set("language", filter.Language)
-	v.Set("country", filter.Country)
-	v.Set("city", filter.City)
-	v.Set("referrer", filter.Referrer)
-	v.Set("referrer_name", filter.ReferrerName)
-	v.Set("os", filter.OS)
-	v.Set("browser", filter.Browser)
-	v.Set("platform", filter.Platform)
-	v.Set("screen_class", filter.ScreenClass)
-	v.Set("utm_source", filter.UTMSource)
-	v.Set("utm_medium", filter.UTMMedium)
-	v.Set("utm_campaign", filter.UTMCampaign)
-	v.Set("utm_content", filter.UTMContent)
-	v.Set("utm_term", filter.UTMTerm)
-	v.Set("custom_metric_key", filter.CustomMetricKey)
-	v.Set("custom_metric_type", string(filter.CustomMetricType))
-	v.Set("offset", strconv.Itoa(filter.Offset))
-	v.Set("limit", strconv.Itoa(filter.Limit))
-	v.Set("sort", filter.Sort)
-	v.Set("direction", filter.Direction)
-	v.Set("search", filter.Search)
+	v.Add("id", filter.DomainID)
+	v.Add("from", filter.From.Format("2006-01-02"))
+	v.Add("to", filter.To.Format("2006-01-02"))
+	v.Add("scale", string(filter.Scale))
+	v.Add("tz", filter.Timezone)
+	client.setURLParams(v, "path", filter.Path)
+	client.setURLParams(v, "entry_path", filter.EntryPath)
+	client.setURLParams(v, "exit_path", filter.ExitPath)
+	client.setURLParams(v, "pattern", filter.Pattern)
+	client.setURLParams(v, "event", filter.Event)
+	client.setURLParams(v, "event_meta_key", filter.EventMetaKey)
+	client.setURLParams(v, "language", filter.Language)
+	client.setURLParams(v, "country", filter.Country)
+	client.setURLParams(v, "city", filter.City)
+	client.setURLParams(v, "referrer", filter.Referrer)
+	client.setURLParams(v, "referrer_name", filter.ReferrerName)
+	client.setURLParams(v, "os", filter.OS)
+	client.setURLParams(v, "browser", filter.Browser)
+	v.Add("platform", filter.Platform)
+	client.setURLParams(v, "screen_class", filter.ScreenClass)
+	client.setURLParams(v, "utm_source", filter.UTMSource)
+	client.setURLParams(v, "utm_medium", filter.UTMMedium)
+	client.setURLParams(v, "utm_campaign", filter.UTMCampaign)
+	client.setURLParams(v, "utm_content", filter.UTMContent)
+	client.setURLParams(v, "utm_term", filter.UTMTerm)
+	v.Add("custom_metric_key", filter.CustomMetricKey)
+	v.Add("custom_metric_type", string(filter.CustomMetricType))
+	v.Add("offset", strconv.Itoa(filter.Offset))
+	v.Add("limit", strconv.Itoa(filter.Limit))
+	v.Add("sort", filter.Sort)
+	v.Add("direction", filter.Direction)
+	v.Add("search", filter.Search)
 
 	if filter.Start > 0 {
 		v.Set("start", strconv.Itoa(filter.Start))
 	}
 
 	for key, value := range filter.EventMeta {
-		v.Set(fmt.Sprintf("meta_%s", key), value)
+		v.Add(fmt.Sprintf("meta_%s", key), value)
+	}
+
+	for key, value := range filter.Tags {
+		v.Add(fmt.Sprintf("tag_%s", key), value)
 	}
 
 	if filter.IncludeAvgTimeOnPage {
@@ -822,6 +852,12 @@ func (client *Client) getStatsRequestURL(endpoint string, filter *Filter) string
 	}
 
 	return u + "?" + v.Encode()
+}
+
+func (client *Client) setURLParams(v url.Values, param string, params []string) {
+	for _, p := range params {
+		v.Add(param, p)
+	}
 }
 
 func (client *Client) waitBeforeNextRequest(retry int) {

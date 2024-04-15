@@ -8,12 +8,8 @@
 #event_path = "e"
 #session_path = "s"
 
-# Filenames for pirsch.js, pirsch-events.js, pirsch-sessions.js, and pirsch-extended.js.
-# Defaults are as configured below.
+# Filename for pa. The default is as configured below.
 #js_filename = "p.js"
-#events_js_filename = "e.js"
-#sessions_js_filename = "s.js"
-#extended_js_filename = "ext.js"
 
 # The base URL is used for testing purposes only.
 #base_url = "https://localhost.com:9999"

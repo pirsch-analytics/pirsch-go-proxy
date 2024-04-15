@@ -3,6 +3,9 @@
 test:
 	go test -cover -race github.com/pirsch-analytics/pirsch-go-proxy/pkg/proxy
 
+run:
+	go run cmd/main.go config/config.toml
+
 deps:
 	go get -u -t ./...
 	go mod tidy

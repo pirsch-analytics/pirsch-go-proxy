@@ -1,5 +1,14 @@
 ## Changelog
 
+## 2.2.0
+
+**Warning! This update has breaking changes!**
+
+* added client hints
+* added option to pass in config path as first argument
+* removed all scripts and replaced them with pa.js
+* updated dependencies
+
 ## 2.1.0
 
 * added support for client hints

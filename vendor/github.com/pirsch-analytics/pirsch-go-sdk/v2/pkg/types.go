@@ -36,20 +36,21 @@ type CustomMetricType string
 // PageView are the parameters to send a page hit to Pirsch.
 type PageView struct {
 	Hostname               string
-	URL                    string `json:"url"`
-	IP                     string `json:"ip"`
-	UserAgent              string `json:"user_agent"`
-	AcceptLanguage         string `json:"accept_language"`
-	SecCHUA                string `json:"sec_ch_ua"`
-	SecCHUAMobile          string `json:"sec_ch_ua_mobile"`
-	SecCHUAPlatform        string `json:"sec_ch_ua_platform"`
-	SecCHUAPlatformVersion string `json:"sec_ch_ua_platform_version"`
-	SecCHWidth             string `json:"sec_ch_width"`
-	SecCHViewportWidth     string `json:"sec_ch_viewport_width"`
-	Title                  string `json:"title"`
-	Referrer               string `json:"referrer"`
-	ScreenWidth            int    `json:"screen_width"`
-	ScreenHeight           int    `json:"screen_height"`
+	URL                    string            `json:"url"`
+	IP                     string            `json:"ip"`
+	UserAgent              string            `json:"user_agent"`
+	AcceptLanguage         string            `json:"accept_language"`
+	SecCHUA                string            `json:"sec_ch_ua"`
+	SecCHUAMobile          string            `json:"sec_ch_ua_mobile"`
+	SecCHUAPlatform        string            `json:"sec_ch_ua_platform"`
+	SecCHUAPlatformVersion string            `json:"sec_ch_ua_platform_version"`
+	SecCHWidth             string            `json:"sec_ch_width"`
+	SecCHViewportWidth     string            `json:"sec_ch_viewport_width"`
+	Title                  string            `json:"title"`
+	Referrer               string            `json:"referrer"`
+	ScreenWidth            int               `json:"screen_width"`
+	ScreenHeight           int               `json:"screen_height"`
+	Tags                   map[string]string `json:"tags"`
 }
 
 // Event represents a single data point for custom events.
@@ -70,27 +71,29 @@ type Filter struct {
 	Start                int               `json:"start,omitempty"`
 	Scale                Scale             `json:"scale,omitempty"`
 	Timezone             string            `json:"tz,omitempty"`
-	Path                 string            `json:"path,omitempty"`
-	Pattern              string            `json:"pattern,omitempty"`
-	EntryPath            string            `json:"entry_path,omitempty"`
-	ExitPath             string            `json:"exit_path,omitempty"`
-	Event                string            `json:"event,omitempty"`
-	EventMetaKey         string            `json:"event_meta_key,omitempty"`
+	Path                 []string          `json:"path,omitempty"`
+	Pattern              []string          `json:"pattern,omitempty"`
+	EntryPath            []string          `json:"entry_path,omitempty"`
+	ExitPath             []string          `json:"exit_path,omitempty"`
+	Event                []string          `json:"event,omitempty"`
+	EventMetaKey         []string          `json:"event_meta_key,omitempty"`
 	EventMeta            map[string]string `json:"-"`
-	Language             string            `json:"language,omitempty"`
-	Country              string            `json:"country,omitempty"`
-	City                 string            `json:"city,omitempty"`
-	Referrer             string            `json:"referrer,omitempty"`
-	ReferrerName         string            `json:"referrer_name,omitempty"`
-	OS                   string            `json:"os,omitempty"`
-	Browser              string            `json:"browser,omitempty"`
+	Language             []string          `json:"language,omitempty"`
+	Country              []string          `json:"country,omitempty"`
+	City                 []string          `json:"city,omitempty"`
+	Referrer             []string          `json:"referrer,omitempty"`
+	ReferrerName         []string          `json:"referrer_name,omitempty"`
+	OS                   []string          `json:"os,omitempty"`
+	Browser              []string          `json:"browser,omitempty"`
 	Platform             string            `json:"platform,omitempty"`
-	ScreenClass          string            `json:"screen_class,omitempty"`
-	UTMSource            string            `json:"utm_source,omitempty"`
-	UTMMedium            string            `json:"utm_medium,omitempty"`
-	UTMCampaign          string            `json:"utm_campaign,omitempty"`
-	UTMContent           string            `json:"utm_content,omitempty"`
-	UTMTerm              string            `json:"utm_term,omitempty"`
+	ScreenClass          []string          `json:"screen_class,omitempty"`
+	UTMSource            []string          `json:"utm_source,omitempty"`
+	UTMMedium            []string          `json:"utm_medium,omitempty"`
+	UTMCampaign          []string          `json:"utm_campaign,omitempty"`
+	UTMContent           []string          `json:"utm_content,omitempty"`
+	UTMTerm              []string          `json:"utm_term,omitempty"`
+	Tag                  []string          `json:"tag"`
+	Tags                 map[string]string `json:"-"`
 	CustomMetricKey      string            `json:"custom_metric_key,omitempty"`
 	CustomMetricType     CustomMetricType  `json:"custom_metric_type,omitempty"`
 	IncludeAvgTimeOnPage bool              `json:"include_avg_time_on_page,omitempty"`
@@ -131,9 +134,14 @@ type Domain struct {
 	ThemeID               string      `json:"theme_id"`
 	Theme                 KeyValue    `json:"theme"`
 	CustomDomain          null.String `json:"custom_domain"`
+	DisplayName           null.String `json:"display_name"`
 	UserRole              string      `json:"user_role"`
 	Settings              KeyValue    `json:"settings"`
 	ThemeSettings         KeyValue    `json:"theme_settings"`
+	Pinned                bool        `json:"pinned"`
+	SubscriptionActive    bool        `json:"subscription_active"`
+
+	//Metadata types.JSONText `json:"metadata"`
 }
 
 // TimeSpentStats is the time spent on the website or specific pages.
@@ -364,7 +372,7 @@ type BrowserStats struct {
 type BrowserVersionStats struct {
 	MetaStats
 	Browser        string `json:"browser"`
-	BrowserVersion string `db:"browser_version" json:"browser_version"`
+	BrowserVersion string `json:"browser_version"`
 }
 
 // OSStats is the result type for operating system statistics.
@@ -377,7 +385,7 @@ type OSStats struct {
 type OSVersionStats struct {
 	MetaStats
 	OS        string `json:"os"`
-	OSVersion string `db:"os_version" json:"os_version"`
+	OSVersion string `json:"os_version"`
 }
 
 // ReferrerStats is the result type for referrer statistics.
@@ -406,6 +414,16 @@ type PlatformStats struct {
 type ScreenClassStats struct {
 	MetaStats
 	ScreenClass string `json:"screen_class"`
+}
+
+// TagStats is the result type for tags.
+type TagStats struct {
+	Key              string  `json:"key"`
+	Value            string  `json:"value"`
+	Visitors         int     `json:"visitors"`
+	Views            int     `json:"views"`
+	RelativeVisitors float64 `json:"relative_visitors"`
+	RelativeViews    float64 `json:"relative_views"`
 }
 
 // Keyword is the result type for keyword statistics.

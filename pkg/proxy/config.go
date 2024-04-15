@@ -13,18 +13,15 @@ var (
 )
 
 type Config struct {
-	Server             Server   `toml:"server"`
-	Clients            []Client `toml:"clients"`
-	Network            Network  `toml:"network"`
-	BaseURL            string   `toml:"base_url"`
-	BasePath           string   `toml:"base_path"`
-	PageViewPath       string   `toml:"page_view_path"`
-	EventPath          string   `toml:"event_path"`
-	SessionPath        string   `toml:"session_path"`
-	JSFilename         string   `toml:"js_filename"`
-	EventsJSFilename   string   `toml:"events_js_filename"`
-	SessionsJSFilename string   `toml:"sessions_js_filename"`
-	ExtendedJSFilename string   `toml:"extended_js_filename"`
+	Server       Server   `toml:"server"`
+	Clients      []Client `toml:"clients"`
+	Network      Network  `toml:"network"`
+	BaseURL      string   `toml:"base_url"`
+	BasePath     string   `toml:"base_path"`
+	PageViewPath string   `toml:"page_view_path"`
+	EventPath    string   `toml:"event_path"`
+	SessionPath  string   `toml:"session_path"`
+	JSFilename   string   `toml:"js_filename"`
 }
 
 type Server struct {
@@ -53,7 +50,13 @@ func GetConfig() *Config {
 
 // LoadConfig loads the toml configuration file.
 func LoadConfig() {
-	data, err := os.ReadFile("config.toml")
+	path := "config.toml"
+
+	if len(os.Args) > 1 {
+		path = os.Args[1]
+	}
+
+	data, err := os.ReadFile(path)
 
 	if err != nil {
 		logbuch.Fatal("Error loading configuration", logbuch.Fields{"err": err})
@@ -90,19 +93,7 @@ func LoadConfig() {
 	}
 
 	if cfg.JSFilename == "" {
-		cfg.JSFilename = "p.js"
-	}
-
-	if cfg.EventsJSFilename == "" {
-		cfg.EventsJSFilename = "e.js"
-	}
-
-	if cfg.SessionsJSFilename == "" {
-		cfg.SessionsJSFilename = "s.js"
-	}
-
-	if cfg.ExtendedJSFilename == "" {
-		cfg.ExtendedJSFilename = "ext.js"
+		cfg.JSFilename = "pa.js"
 	}
 
 	loadIPHeader(cfg)
@@ -134,6 +125,7 @@ func loadSubnets(config *Config) {
 
 		if err != nil {
 			logbuch.Fatal("Error parsing subnet", logbuch.Fields{"err": err, "subnet": subnet})
+			return
 		}
 
 		allowedSubnets = append(allowedSubnets, *n)

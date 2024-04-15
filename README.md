@@ -10,7 +10,7 @@ Additionally, you can create rollup views and send data to multiple dashboards w
 
 ## Installation
 
-Download the latest release archive from the releases section on GitHub and extract it to your server. Create an API client (or several) on the Pirsch dashboard and edit the [config.toml](config/config.toml) file to suit your needs. You can then start the server. We recommend creating a systemd unit file or using Docker.
+Download the latest release archive from the releases section on GitHub and extract it to your server. Create an API client (or several) on the Pirsch dashboard and edit the [config.toml](config/config.toml) file to suit your needs. Then you can start the server. We recommend creating a systemd unit file or using Docker. The configuration path can be passed as the first application argument.
 
 ## Docker
 
@@ -23,22 +23,16 @@ Once you have installed the proxy on your server, you can add the Pirsch JavaScr
 > If you have adjusted the path configuration, make sure you adjust the script and endpoint paths.
 > If you have installed it on a different domain or subdomain, adjust the `src` and `data-endpoint` parameters to include the domain.
 
-Here is an example for the `pirsch.js` script with the default configuration.
+Here is an example with the default configuration:
 
 ```JavaScript
 <script defer type="text/javascript"
-        src="/p/p.js"
-        id="pirschjs"
-        data-endpoint="/p/pv"></script>
+    src="/p/pa.js"
+    id="pianjs"
+    data-hit-endpoint="/p/pv"
+    data-event-endpoint="/p/e"
+    data-session-endpoint="/p/s"></script>
 ```
-
-There are three other scripts available:
-
-* `pirsch-events.js` as `e.js` using the endpoint `/p/e`
-* `pirsch-sessions.js` as `s.js` using the endpoint `/p/s`
-* `pirsch-extended.js` as `ext.js` using all of the other endpoints
-
-Note that the extended scripts use different endpoint parameters. Namely `data-hit-endpoint`, `data-event-endpoint` and `data-session-endpoint`.
 
 ## Local development
 

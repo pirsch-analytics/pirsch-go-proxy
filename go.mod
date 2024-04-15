@@ -5,11 +5,11 @@ go 1.21
 require (
 	github.com/BurntSushi/toml v1.3.2
 	github.com/emvi/logbuch v1.2.0
-	github.com/go-chi/chi/v5 v5.0.10
+	github.com/go-chi/chi/v5 v5.0.12
 	github.com/go-chi/cors v1.2.1
-	github.com/klauspost/compress v1.17.0
-	github.com/pirsch-analytics/pirsch-go-sdk/v2 v2.1.0
-	github.com/stretchr/testify v1.8.4
+	github.com/klauspost/compress v1.17.8
+	github.com/pirsch-analytics/pirsch-go-sdk/v2 v2.2.0
+	github.com/stretchr/testify v1.9.0
 )
 
 require (

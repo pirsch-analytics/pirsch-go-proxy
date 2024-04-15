@@ -20,28 +20,13 @@ func configureLogging() {
 
 func logSnippets() {
 	cfg := proxy.GetConfig()
-	fmt.Println("\npirsch.js:")
+	fmt.Println("\npa.js:")
 	fmt.Println(fmt.Sprintf(`<script defer type="text/javascript"
 	src="%s"
-	id="pirschjs"
-	data-endpoint="%s"></script>`, filepath.Join(cfg.BasePath, cfg.JSFilename), filepath.Join(cfg.BasePath, cfg.PageViewPath)))
-	fmt.Println("\npirsch-events.js:")
-	fmt.Println(fmt.Sprintf(`<script defer type="text/javascript"
-	src="%s"
-	id="pirschjs"
-	data-endpoint="%s"></script>`, filepath.Join(cfg.BasePath, cfg.EventsJSFilename), filepath.Join(cfg.BasePath, cfg.EventPath)))
-	fmt.Println("\npirsch-sessions.js:")
-	fmt.Println(fmt.Sprintf(`<script defer type="text/javascript"
-	src="%s"
-	id="pirschjs"
-	data-endpoint="%s"></script>`, filepath.Join(cfg.BasePath, cfg.SessionsJSFilename), filepath.Join(cfg.BasePath, cfg.SessionPath)))
-	fmt.Println("\npirsch-extended.js:")
-	fmt.Println(fmt.Sprintf(`<script defer type="text/javascript"
-	src="%s"
-	id="pirschextendedjs"
+	id="pianjs"
 	data-hit-endpoint="%s"
 	data-event-endpoint="%s"
-	data-session-endpoint="%s"></script>`, filepath.Join(cfg.BasePath, cfg.ExtendedJSFilename), filepath.Join(cfg.BasePath, cfg.PageViewPath), filepath.Join(cfg.BasePath, cfg.EventPath), filepath.Join(cfg.BasePath, cfg.SessionPath)))
+	data-session-endpoint="%s"></script>`, filepath.Join(cfg.BasePath, cfg.JSFilename), filepath.Join(cfg.BasePath, cfg.PageViewPath), filepath.Join(cfg.BasePath, cfg.EventPath), filepath.Join(cfg.BasePath, cfg.SessionPath)))
 	fmt.Println()
 }
 

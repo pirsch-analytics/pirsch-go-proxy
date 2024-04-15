@@ -1,4 +1,4 @@
-FROM golang:1.21 AS build
+FROM golang AS build
 RUN apt update && apt upgrade -y
 WORKDIR /go/src/pirsch-go-proxy
 COPY .. .

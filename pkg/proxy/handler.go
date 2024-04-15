@@ -16,9 +16,9 @@ import (
 )
 
 var (
-	pirschJS, eventsJS, sessionsJS, extendedJS                         []byte
-	updatePirschJS, updateEventsJS, updateSessionsJS, updateExtendedJS time.Time
-	m                                                                  sync.RWMutex
+	pirschJS       []byte
+	updatePirschJS time.Time
+	m              sync.RWMutex
 )
 
 // GetRouter sets up and returns the router.
@@ -34,10 +34,7 @@ func GetRouter() *chi.Mux {
 	router.Get(filepath.Join(config.BasePath, config.PageViewPath), pageView)
 	router.Post(filepath.Join(config.BasePath, config.EventPath), event)
 	router.Post(filepath.Join(config.BasePath, config.SessionPath), session)
-	serveScript(router, config.JSFilename, "pirsch.js", &pirschJS, &updatePirschJS)
-	serveScript(router, config.EventsJSFilename, "pirsch-events.js", &eventsJS, &updateEventsJS)
-	serveScript(router, config.SessionsJSFilename, "pirsch-sessions.js", &sessionsJS, &updateSessionsJS)
-	serveScript(router, config.ExtendedJSFilename, "pirsch-extended.js", &extendedJS, &updateExtendedJS)
+	serveScript(router, config.JSFilename, "pa.js", &pirschJS, &updatePirschJS)
 	return router
 }
 
@@ -90,14 +87,20 @@ func pageView(w http.ResponseWriter, r *http.Request) {
 	width, _ := strconv.ParseInt(query.Get("w"), 10, 16)
 	height, _ := strconv.ParseInt(query.Get("h"), 10, 16)
 	options := &pirsch.PageViewOptions{
-		URL:            query.Get("url"),
-		IP:             getIP(r),
-		UserAgent:      r.Header.Get("User-Agent"),
-		AcceptLanguage: r.Header.Get("Accept-Language"),
-		Title:          query.Get("t"),
-		Referrer:       query.Get("ref"),
-		ScreenWidth:    int(width),
-		ScreenHeight:   int(height),
+		URL:                    query.Get("url"),
+		IP:                     getIP(r),
+		UserAgent:              r.Header.Get("User-Agent"),
+		AcceptLanguage:         r.Header.Get("Accept-Language"),
+		SecCHUA:                r.Header.Get("Sec-CH-UA"),
+		SecCHUAMobile:          r.Header.Get("Sec-CH-UA-Mobile"),
+		SecCHUAPlatform:        r.Header.Get("Sec-CH-UA-Platform"),
+		SecCHUAPlatformVersion: r.Header.Get("Sec-CH-UA-Platform-Version"),
+		SecCHWidth:             r.Header.Get("Sec-CH-Width"),
+		SecCHViewportWidth:     r.Header.Get("Sec-CH-Viewport-Width"),
+		Title:                  query.Get("t"),
+		Referrer:               query.Get("ref"),
+		ScreenWidth:            int(width),
+		ScreenHeight:           int(height),
 	}
 
 	for _, client := range clients {
@@ -134,14 +137,20 @@ func event(w http.ResponseWriter, r *http.Request) {
 	}
 
 	options := &pirsch.PageViewOptions{
-		URL:            e.URL,
-		IP:             getIP(r),
-		UserAgent:      r.Header.Get("User-Agent"),
-		AcceptLanguage: r.Header.Get("Accept-Language"),
-		Title:          e.Title,
-		Referrer:       e.Referrer,
-		ScreenWidth:    e.ScreenWidth,
-		ScreenHeight:   e.ScreenHeight,
+		URL:                    e.URL,
+		IP:                     getIP(r),
+		UserAgent:              r.Header.Get("User-Agent"),
+		AcceptLanguage:         r.Header.Get("Accept-Language"),
+		SecCHUA:                r.Header.Get("Sec-CH-UA"),
+		SecCHUAMobile:          r.Header.Get("Sec-CH-UA-Mobile"),
+		SecCHUAPlatform:        r.Header.Get("Sec-CH-UA-Platform"),
+		SecCHUAPlatformVersion: r.Header.Get("Sec-CH-UA-Platform-Version"),
+		SecCHWidth:             r.Header.Get("Sec-CH-Width"),
+		SecCHViewportWidth:     r.Header.Get("Sec-CH-Viewport-Width"),
+		Title:                  e.Title,
+		Referrer:               e.Referrer,
+		ScreenWidth:            e.ScreenWidth,
+		ScreenHeight:           e.ScreenHeight,
 	}
 
 	for _, client := range clients {
