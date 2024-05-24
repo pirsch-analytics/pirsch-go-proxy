@@ -51,6 +51,7 @@ const (
 	browserEndpoint         = "/api/v1/statistics/browser"
 	browserVersionEndpoint  = "/api/v1/statistics/browser/version"
 	countryEndpoint         = "/api/v1/statistics/country"
+	regionEndpoint          = "/api/v1/statistics/region"
 	cityEndpoint            = "/api/v1/statistics/city"
 	platformEndpoint        = "/api/v1/statistics/platform"
 	screenEndpoint          = "/api/v1/statistics/screen"
@@ -171,10 +172,6 @@ func (client *Client) PageView(r *http.Request, options *PageViewOptions) error 
 
 // Event sends an event to Pirsch for given http.Request and options.
 func (client *Client) Event(name string, durationSeconds int, meta map[string]string, r *http.Request, options *PageViewOptions) error {
-	if r.Header.Get("DNT") == "1" {
-		return nil
-	}
-
 	if options == nil {
 		options = new(PageViewOptions)
 	}
@@ -189,10 +186,6 @@ func (client *Client) Event(name string, durationSeconds int, meta map[string]st
 
 // Session keeps a session alive for the given http.Request and options.
 func (client *Client) Session(r *http.Request, options *PageViewOptions) error {
-	if r.Header.Get("DNT") == "1" {
-		return nil
-	}
-
 	if options == nil {
 		options = new(PageViewOptions)
 	}
@@ -505,6 +498,17 @@ func (client *Client) Country(filter *Filter) ([]CountryStats, error) {
 	stats := make([]CountryStats, 0)
 
 	if err := client.performGet(client.getStatsRequestURL(countryEndpoint, filter), client.requestRetries, &stats); err != nil {
+		return nil, err
+	}
+
+	return stats, nil
+}
+
+// Region returns region statistics.
+func (client *Client) Region(filter *Filter) ([]RegionStats, error) {
+	stats := make([]RegionStats, 0)
+
+	if err := client.performGet(client.getStatsRequestURL(regionEndpoint, filter), client.requestRetries, &stats); err != nil {
 		return nil, err
 	}
 

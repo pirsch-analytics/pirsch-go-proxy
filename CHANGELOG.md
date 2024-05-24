@@ -1,5 +1,10 @@
 ## Changelog
 
+## 2.3.0
+
+* removed DNT
+* updated dependencies
+
 ## 2.2.0
 
 **Warning! This update has breaking changes!**

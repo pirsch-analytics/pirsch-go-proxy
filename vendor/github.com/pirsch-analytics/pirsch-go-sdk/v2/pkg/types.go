@@ -80,6 +80,7 @@ type Filter struct {
 	EventMeta            map[string]string `json:"-"`
 	Language             []string          `json:"language,omitempty"`
 	Country              []string          `json:"country,omitempty"`
+	Region               []string          `json:"region,omitempty"`
 	City                 []string          `json:"city,omitempty"`
 	Referrer             []string          `json:"referrer,omitempty"`
 	ReferrerName         []string          `json:"referrer_name,omitempty"`
@@ -356,10 +357,19 @@ type CountryStats struct {
 	CountryCode string `json:"country_code"`
 }
 
+// RegionStats is the result type for region statistics.
+type RegionStats struct {
+	MetaStats
+	CountryCode string `json:"country_code"`
+	Region      string `json:"region"`
+}
+
 // CityStats is the result type for city statistics.
 type CityStats struct {
 	MetaStats
-	City string `json:"city"`
+	CountryCode string `json:"country_code"`
+	Region      string `json:"region"`
+	City        string `json:"city"`
 }
 
 // BrowserStats is the result type for browser statistics.
