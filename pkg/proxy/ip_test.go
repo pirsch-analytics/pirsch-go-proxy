@@ -59,6 +59,15 @@ func TestParseXForwardedForHeader(t *testing.T) {
 	}
 }
 
+func TestParseXForwardedForHeaderCaddy(t *testing.T) {
+	assert.Equal(t, "2003:e1:7f03:8893:5f5e:3681:6c1f:b086", parseXForwardedForHeaderFirst("2003:e1:7f03:8893:5f5e:3681:6c1f:b086, 10.0.1.254"))
+	assert.Equal(t, "2003:e1:7f03:8893:5f5e:3681:6c1f:b086", parseXForwardedForHeaderFirst("[2003:e1:7f03:8893:5f5e:3681:6c1f:b086]:9876, 10.0.1.254"))
+	assert.Equal(t, "123.245.221.9", parseXForwardedForHeaderFirst("123.245.221.9:9876, 10.0.1.254"))
+	assert.Equal(t, "87.171.210.182", parseXForwardedForHeaderFirst("87.171.210.182, 10.0.1.7"))
+	assert.Empty(t, parseXForwardedForHeaderFirst("2003:e1:7f0c:5700:1e36:e95f:7ef1:401b"))
+	assert.Empty(t, parseXForwardedForHeaderFirst("123.245.221.9"))
+}
+
 func TestParseXRealIPHeader(t *testing.T) {
 	header := []string{
 		"",

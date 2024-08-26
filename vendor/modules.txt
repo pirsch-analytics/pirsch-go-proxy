@@ -11,13 +11,13 @@ github.com/emvi/logbuch
 # github.com/emvi/null v1.3.1
 ## explicit
 github.com/emvi/null
-# github.com/go-chi/chi/v5 v5.0.12
+# github.com/go-chi/chi/v5 v5.1.0
 ## explicit; go 1.14
 github.com/go-chi/chi/v5
 # github.com/go-chi/cors v1.2.1
 ## explicit; go 1.14
 github.com/go-chi/cors
-# github.com/klauspost/compress v1.17.8
+# github.com/klauspost/compress v1.17.9
 ## explicit; go 1.20
 github.com/klauspost/compress
 github.com/klauspost/compress/flate
@@ -31,7 +31,7 @@ github.com/klauspost/compress/internal/cpuinfo
 github.com/klauspost/compress/internal/snapref
 github.com/klauspost/compress/zstd
 github.com/klauspost/compress/zstd/internal/xxhash
-# github.com/pirsch-analytics/pirsch-go-sdk/v2 v2.3.0
+# github.com/pirsch-analytics/pirsch-go-sdk/v2 v2.4.0
 ## explicit; go 1.21
 github.com/pirsch-analytics/pirsch-go-sdk/v2/pkg
 # github.com/pmezard/go-difflib v1.0.0

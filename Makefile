@@ -1,7 +1,7 @@
-.PHONY: test deps docker release
+.PHONY: test run deps docker release
 
 test:
-	go test -cover -race github.com/pirsch-analytics/pirsch-go-proxy/pkg/proxy
+	go test -cover -race ./pkg/...
 
 run:
 	go run cmd/main.go config/config.toml

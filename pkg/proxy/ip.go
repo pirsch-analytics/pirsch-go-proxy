@@ -7,12 +7,13 @@ import (
 )
 
 var (
-	cfConnectingIP = headerParser{"CF-Connecting-IP", parseXForwardedForHeader}
-	trueClientIP   = headerParser{"True-Client-IP", parseXForwardedForHeader}
-	xForwardedFor  = headerParser{"X-Forwarded-For", parseXForwardedForHeader}
-	forwarded      = headerParser{"Forwarded", parseForwardedHeader}
-	xRealIP        = headerParser{"X-Real-IP", parseXRealIPHeader}
-	allIPHeader    = []headerParser{
+	cfConnectingIP     = headerParser{"CF-Connecting-IP", parseXForwardedForHeader}
+	trueClientIP       = headerParser{"True-Client-IP", parseXForwardedForHeader}
+	xForwardedFor      = headerParser{"X-Forwarded-For", parseXForwardedForHeader}
+	forwarded          = headerParser{"Forwarded", parseForwardedHeader}
+	xRealIP            = headerParser{"X-Real-IP", parseXRealIPHeader}
+	xForwardedForCaddy = headerParser{"X-Forwarded-For", parseXForwardedForHeader}
+	allIPHeader        = []headerParser{
 		cfConnectingIP,
 		trueClientIP,
 		xForwardedFor,
@@ -114,6 +115,28 @@ func parseXForwardedForHeader(value string) string {
 		if isValidIP(ip) {
 			return ip
 		}
+	}
+
+	return ""
+}
+
+func parseXForwardedForHeaderFirst(value string) string {
+	parts := strings.Split(value, ",")
+
+	if len(parts) > 1 {
+		ip := parts[0]
+
+		if strings.Contains(ip, ":") {
+			host, _, err := net.SplitHostPort(ip)
+
+			if err != nil {
+				return ip
+			}
+
+			return strings.TrimSpace(host)
+		}
+
+		return strings.TrimSpace(ip)
 	}
 
 	return ""

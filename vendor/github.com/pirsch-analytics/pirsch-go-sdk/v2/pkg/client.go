@@ -58,6 +58,8 @@ const (
 	tagKeysEndpoint         = "/api/v1/statistics/tags"
 	tagDetailsEndpoint      = "/api/v1/statistics/tag/details"
 	keywordsEndpoint        = "/api/v1/statistics/keywords"
+	listFunnelEndpoint      = "/api/v1/funnel?id=%s"
+	funnelEndpoint          = "/api/v1/statistics/funnel"
 )
 
 var referrerQueryParams = []string{
@@ -581,6 +583,28 @@ func (client *Client) Keywords(filter *Filter) ([]Keyword, error) {
 	return stats, nil
 }
 
+// ListFunnel returns a list of all funnels including step definition for given domain ID.
+func (client *Client) ListFunnel(id string) ([]Funnel, error) {
+	funnel := make([]Funnel, 0)
+
+	if err := client.performGet(client.baseURL+fmt.Sprintf(listFunnelEndpoint, id), client.requestRetries, &funnel); err != nil {
+		return nil, err
+	}
+
+	return funnel, nil
+}
+
+// Funnel returns a funnel definition and statistics for given funnel ID and filter.
+func (client *Client) Funnel(id string, filter *Filter) (*FunnelData, error) {
+	var funnel FunnelData
+
+	if err := client.performGet(client.getStatsRequestURL(funnelEndpoint, filter)+fmt.Sprintf("&funnel_id=%s", id), client.requestRetries, &funnel); err != nil {
+		return nil, err
+	}
+
+	return &funnel, nil
+}
+
 func (client *Client) getPageViewData(r *http.Request, options *PageViewOptions) PageView {
 	return PageView{
 		URL:                    client.selectField(options.URL, r.URL.String()),
@@ -817,6 +841,7 @@ func (client *Client) getStatsRequestURL(endpoint string, filter *Filter) string
 	client.setURLParams(v, "event_meta_key", filter.EventMetaKey)
 	client.setURLParams(v, "language", filter.Language)
 	client.setURLParams(v, "country", filter.Country)
+	client.setURLParams(v, "region", filter.Region)
 	client.setURLParams(v, "city", filter.City)
 	client.setURLParams(v, "referrer", filter.Referrer)
 	client.setURLParams(v, "referrer_name", filter.ReferrerName)

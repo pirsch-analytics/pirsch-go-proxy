@@ -113,6 +113,12 @@ func loadIPHeader(config *Config) {
 			}
 		}
 
+		if strings.ToLower(header) == "caddy" {
+			ipHeader = append(ipHeader, xForwardedForCaddy)
+			found = true
+			break
+		}
+
 		if !found {
 			logbuch.Fatal("Header invalid", logbuch.Fields{"header": header})
 		}

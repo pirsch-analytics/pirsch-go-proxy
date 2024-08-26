@@ -28,8 +28,9 @@
 # This configuration can be used to retreive the real client IP address and set accepted subnets for proxies and load balancers.
 # Make sure you use the correct header if you are running the proxy behind another proxy or load balancer, otherwise the statistics will be inaccurate.
 [network]
-    # Parsed in order, allowed values: CF-Connecting-IP, True-Client-IP, X-Forwarded-For, Forwarded, X-Real-IP
+    # Parsed in order, allowed values: CF-Connecting-IP, True-Client-IP, X-Forwarded-For, Forwarded, X-Real-IP, caddy
     # The proxy will use the remote IP if no header is configured.
+    # For Caddy add "caddy" to the list. It's the same as X-Forwarded-For, but uses the first entry instead of the last.
     header = ["CF-Connecting-IP", "True-Client-IP", "X-Forwarded-For", "Forwarded", "X-Real-IP"]
 
     # List of allowed subnets (CIDR).
