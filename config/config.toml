@@ -43,7 +43,7 @@
 
     # Filters can be used to filter traffic based on the hostname, path, and identification code.
     # The hostname and path filters support regular expressions with the "regex:" prefix for the matcher.
-    #[[clients.filter]]
+    #[clients.filter]
         #hostname = ["filter-me.com", "regex:[0-9]+\\.filter-me\\.com"]
         #path = ["/filter/path", "regex:\\/filter\\/[0-9]+"]
         #identification_code = ["id01234", "id56789"]
