@@ -1,10 +1,11 @@
 package proxy
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseForwardedHeader(t *testing.T) {

@@ -1,5 +1,11 @@
 ## Changelog
 
+## 2.5.0
+
+* added client traffic filters to support using a single proxy for multiple sites
+* switched from logbuch to slog for logging
+* updated dependencies
+
 ## 2.4.0
 
 * added Caddy IP address header parser

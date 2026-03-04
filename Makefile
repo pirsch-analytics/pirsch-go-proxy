@@ -11,6 +11,9 @@ deps:
 	go mod tidy
 	go mod vendor
 
+fix:
+	go fix ./...
+
 docker: test
 	docker build -t pirsch/proxy:$(VERSION) -f build/Dockerfile .
 	docker push pirsch/proxy:$(VERSION)

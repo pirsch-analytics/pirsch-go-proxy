@@ -39,8 +39,14 @@
 # List of clients to send data to.
 # The client ID can be left empty if you use an access key instead of oAuth, which is what we recommend.
 [[clients]]
-#    id = "your-client-id"
     secret = "your-client-secret or access-key"
+
+    # Filters can be used to filter traffic based on the hostname, path, and identification code.
+    # The hostname and path filters support regular expressions with the "regex:" prefix for the matcher.
+    #[[clients.filter]]
+        #hostname = ["filter-me.com", "regex:[0-9]+\\.filter-me\\.com"]
+        #path = ["/filter/path", "regex:\\/filter\\/[0-9]+"]
+        #identification_code = ["id01234", "id56789"]
 
 #[[clients]]
 #    id = "your-client-id"

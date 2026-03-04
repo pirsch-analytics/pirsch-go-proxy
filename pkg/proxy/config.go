@@ -1,11 +1,12 @@
 package proxy
 
 import (
-	"github.com/BurntSushi/toml"
-	"github.com/emvi/logbuch"
+	"log/slog"
 	"net"
 	"os"
 	"strings"
+
+	"github.com/BurntSushi/toml"
 )
 
 var (
@@ -34,8 +35,15 @@ type Server struct {
 }
 
 type Client struct {
-	ID     string `toml:"id"`
-	Secret string `toml:"secret"`
+	ID     string       `toml:"id"`
+	Secret string       `toml:"secret"`
+	Filter ClientFilter `toml:"filter"`
+}
+
+type ClientFilter struct {
+	Hostname           []string `toml:"hostname"`
+	Path               []string `toml:"path"`
+	IdentificationCode []string `toml:"identification_code"`
 }
 
 type Network struct {
@@ -59,13 +67,14 @@ func LoadConfig() {
 	data, err := os.ReadFile(path)
 
 	if err != nil {
-		logbuch.Fatal("Error loading configuration", logbuch.Fields{"err": err})
+		slog.Error("Error loading configuration", "err", err)
+		panic(err)
 	}
 
 	cfg := new(Config)
 
 	if err := toml.Unmarshal(data, cfg); err != nil {
-		logbuch.Fatal("Error loading configuration", logbuch.Fields{"err": err})
+		slog.Error("Error loading configuration", "err", err)
 	}
 
 	if cfg.Server.WriteTimeout == 0 {
@@ -120,7 +129,8 @@ func loadIPHeader(config *Config) {
 		}
 
 		if !found {
-			logbuch.Fatal("Header invalid", logbuch.Fields{"header": header})
+			slog.Error("Header invalid", "header", header)
+			panic("Header invalid")
 		}
 	}
 }
@@ -130,7 +140,7 @@ func loadSubnets(config *Config) {
 		_, n, err := net.ParseCIDR(subnet)
 
 		if err != nil {
-			logbuch.Fatal("Error parsing subnet", logbuch.Fields{"err": err, "subnet": subnet})
+			slog.Error("Error parsing subnet", "err", err, "subnet", subnet)
 			return
 		}
 

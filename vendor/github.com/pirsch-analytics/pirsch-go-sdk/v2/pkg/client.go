@@ -40,6 +40,7 @@ const (
 	conversionGoalsEndpoint = "/api/v1/statistics/goals"
 	eventsEndpoint          = "/api/v1/statistics/events"
 	eventMetadataEndpoint   = "/api/v1/statistics/event/meta"
+	eventPageEndpoint       = "/api/v1/statistics/event/page"
 	listEventsEndpoint      = "/api/v1/statistics/event/list"
 	growthRateEndpoint      = "/api/v1/statistics/growth"
 	activeVisitorsEndpoint  = "/api/v1/statistics/active"
@@ -385,6 +386,18 @@ func (client *Client) EventMetadata(filter *Filter) ([]EventStats, error) {
 	return stats, nil
 }
 
+// EventPages returns the pages an event has been triggered on.
+// The Pages endpoint will return any page that has been visited during a session with a specific event.
+func (client *Client) EventPages(filter *Filter) ([]PageStats, error) {
+	stats := make([]PageStats, 0)
+
+	if err := client.performGet(client.getStatsRequestURL(eventPageEndpoint, filter), client.requestRetries, &stats); err != nil {
+		return nil, err
+	}
+
+	return stats, nil
+}
+
 // ListEvents returns a list of all events including metadata.
 func (client *Client) ListEvents(filter *Filter) ([]EventListStats, error) {
 	stats := make([]EventListStats, 0)
@@ -723,6 +736,8 @@ func (client *Client) performPost(url string, body interface{}, retry int) error
 		return err
 	}
 
+	defer func() { _ = resp.Body.Close() }()
+
 	// refresh access token and retry
 	if client.clientID != "" && retry > 0 && resp.StatusCode != http.StatusOK {
 		client.waitBeforeNextRequest(retry)
@@ -781,6 +796,8 @@ func (client *Client) performGet(url string, retry int, result interface{}) erro
 	if err != nil {
 		return err
 	}
+
+	defer func() { _ = resp.Body.Close() }()
 
 	// refresh access token and retry
 	if client.clientID != "" && retry > 0 && resp.StatusCode != http.StatusOK {
