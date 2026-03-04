@@ -2,8 +2,6 @@ github.com/BurntSushi/toml v1.6.0 h1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk
 github.com/BurntSushi/toml v1.6.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/emvi/logbuch v1.2.0 h1:Bw0jQH1Dbs+oIygZBNx/2Ub1igXRFtKQrIMRrZdVFJM=
-github.com/emvi/logbuch v1.2.0/go.mod h1:hFxe0XQOFl76SkE/f0Pt5oQbXRZtyGa8EroBrrbQHuc=
 github.com/emvi/null v1.3.1 h1:EQxrthMJnzpozGgKrcCepJmwrzA+UCk7ctBWOZLTW0Y=
 github.com/emvi/null v1.3.1/go.mod h1:tEZhBSLFCucrJdwRentxoOLVRpTCy/3aIfiNKE2uuYU=
 github.com/go-chi/chi/v5 v5.2.5 h1:Eg4myHZBjyvJmAFjFvWgrqDTXFyOzjj7YIm3L3mu6Ug=

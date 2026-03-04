@@ -2,17 +2,19 @@ package proxy
 
 import (
 	"encoding/json"
-	"github.com/emvi/logbuch"
+	"io"
+	"log/slog"
+	"net/http"
+	"path/filepath"
+	"slices"
+	"strconv"
+	"sync"
+	"time"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/klauspost/compress/gzhttp"
 	pirsch "github.com/pirsch-analytics/pirsch-go-sdk/v2/pkg"
-	"io"
-	"net/http"
-	"path/filepath"
-	"strconv"
-	"sync"
-	"time"
 )
 
 var (
@@ -46,7 +48,7 @@ func serveScript(router *chi.Mux, filename, file string, content *[]byte, update
 			m.RUnlock()
 
 			if err := downloadFile(file, content, updateAt); err != nil {
-				logbuch.Error("Error downloading script", logbuch.Fields{"err": err, "file": file})
+				slog.Error("Error downloading script", "err", err, "file", file)
 				w.WriteHeader(http.StatusNotFound)
 				return
 			}
@@ -57,7 +59,7 @@ func serveScript(router *chi.Mux, filename, file string, content *[]byte, update
 		defer m.RUnlock()
 
 		if _, err := w.Write(*content); err != nil {
-			logbuch.Error("Error sending script", logbuch.Fields{"err": err, "file": file})
+			slog.Error("Error sending script", "err", err, "file", file)
 		}
 	})))
 }
@@ -72,6 +74,9 @@ func downloadFile(file string, content *[]byte, updateAt *time.Time) error {
 		return err
 	}
 
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 	data, err := io.ReadAll(resp.Body)
 
 	if err != nil {
@@ -103,9 +108,13 @@ func pageView(w http.ResponseWriter, r *http.Request) {
 		ScreenHeight:           int(height),
 	}
 
-	for _, client := range clients {
-		if err := client.PageView(r, options); err != nil {
-			logbuch.Error("Error sending page view", logbuch.Fields{"err": err})
+	for _, c := range clients {
+		if slices.ContainsFunc(c.filter, func(f FilterFunc) bool { return f(r.URL) }) {
+			continue
+		}
+
+		if err := c.api.PageView(r, options); err != nil {
+			slog.Error("Error sending page view", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			break
 		}
@@ -153,9 +162,13 @@ func event(w http.ResponseWriter, r *http.Request) {
 		ScreenHeight:           e.ScreenHeight,
 	}
 
-	for _, client := range clients {
-		if err := client.Event(e.EventName, e.EventDuration, e.EventMeta, r, options); err != nil {
-			logbuch.Error("Error sending event", logbuch.Fields{"err": err})
+	for _, c := range clients {
+		if slices.ContainsFunc(c.filter, func(f FilterFunc) bool { return f(r.URL) }) {
+			continue
+		}
+
+		if err := c.api.Event(e.EventName, e.EventDuration, e.EventMeta, r, options); err != nil {
+			slog.Error("Error sending event", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			break
 		}
@@ -163,15 +176,19 @@ func event(w http.ResponseWriter, r *http.Request) {
 }
 
 func session(w http.ResponseWriter, r *http.Request) {
-	for _, client := range clients {
+	for _, c := range clients {
+		if slices.ContainsFunc(c.filter, func(f FilterFunc) bool { return f(r.URL) }) {
+			continue
+		}
+
 		options := &pirsch.PageViewOptions{
 			IP:             getIP(r),
 			UserAgent:      r.Header.Get("User-Agent"),
 			AcceptLanguage: r.Header.Get("Accept-Language"),
 		}
 
-		if err := client.Session(r, options); err != nil {
-			logbuch.Error("Error extending session", logbuch.Fields{"err": err})
+		if err := c.api.Session(r, options); err != nil {
+			slog.Error("Error extending session", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			break
 		}

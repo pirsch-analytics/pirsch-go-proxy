@@ -10,11 +10,11 @@ Additionally, you can create rollup views and send data to multiple dashboards w
 
 ## Installation
 
-Download the latest release archive from the releases section on GitHub and extract it to your server. Create an API client (or several) on the Pirsch dashboard and edit the [config.toml](config/config.toml) file to suit your needs. Then you can start the server. We recommend creating a systemd unit file or using Docker. The configuration path can be passed as the first application argument.
+Download the latest release archive from the releases section on GitHub and extract it to your server. Create one or more API clients on the Pirsch dashboard and edit the [config.toml](config/config.toml) file to suit your needs. Then you can start the server. We recommend creating a systemd unit file or using Docker. The configuration path can be passed as the first application argument.
 
 ## Docker
 
-Alternatively, you can use Docker to install the proxy. A docker-compose for deployment can be found [here](deploy/docker-compose.yml);
+Alternatively, you can use Docker to install the proxy. A docker compose can be found [here](deploy/docker-compose.yml);
 
 ## Usage
 

@@ -4,19 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/emvi/logbuch"
-	"github.com/pirsch-analytics/pirsch-go-proxy/pkg/proxy"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"time"
-)
 
-func configureLogging() {
-	logbuch.SetFormatter(logbuch.NewFieldFormatter("2006-01-02_15:04:05", "\t"))
-	logbuch.SetLevel(logbuch.LevelInfo)
-}
+	"github.com/pirsch-analytics/pirsch-go-proxy/pkg/proxy"
+)
 
 func logSnippets() {
 	cfg := proxy.GetConfig()
@@ -32,12 +28,7 @@ func logSnippets() {
 
 func startServer(handler http.Handler) {
 	cfg := proxy.GetConfig()
-	logbuch.Info("Starting server...", logbuch.Fields{
-		"write_timeout": cfg.Server.WriteTimeout,
-		"read_timeout":  cfg.Server.ReadTimeout,
-		"host":          cfg.Server.Host,
-	})
-
+	slog.Info("Starting server...", "write_timeout", cfg.Server.WriteTimeout, "read_timeout", cfg.Server.ReadTimeout, "host", cfg.Server.Host)
 	server := &http.Server{
 		Handler:      handler,
 		Addr:         cfg.Server.Host,
@@ -49,31 +40,33 @@ func startServer(handler http.Handler) {
 		sigint := make(chan os.Signal, 1)
 		signal.Notify(sigint, os.Interrupt)
 		<-sigint
-		logbuch.Info("Shutting down server...")
+		slog.Info("Shutting down server...")
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 
 		if err := server.Shutdown(ctx); err != nil {
-			logbuch.Fatal("Error shutting down server gracefully", logbuch.Fields{"err": err})
+			slog.Error("Error shutting down server gracefully", "err", err)
+			panic(err)
 		}
 
 		cancel()
 	}()
 
 	if cfg.Server.TLS {
-		logbuch.Info("TLS enabled")
+		slog.Info("TLS enabled")
 
 		if err := server.ListenAndServeTLS(cfg.Server.TLSCert, cfg.Server.TLSKey); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logbuch.Fatal(err.Error())
+			slog.Error(err.Error())
+			panic(err)
 		}
 	} else {
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logbuch.Fatal(err.Error())
+			slog.Error(err.Error())
+			panic(err)
 		}
 	}
 }
 
 func main() {
-	configureLogging()
 	proxy.LoadConfig()
 	proxy.SetupClients()
 	logSnippets()
