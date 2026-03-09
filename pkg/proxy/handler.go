@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net/http"
 	"path/filepath"
-	"slices"
 	"strconv"
 	"sync"
 	"time"
@@ -109,14 +108,12 @@ func pageView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, c := range clients {
-		if slices.ContainsFunc(c.filter, func(f FilterFunc) bool { return f(r.URL) }) {
-			continue
-		}
-
-		if err := c.api.PageView(r, options); err != nil {
-			slog.Error("Error sending page view", "err", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			break
+		if acceptRequest(c, r) {
+			if err := c.api.PageView(r, options); err != nil {
+				slog.Error("Error sending page view", "err", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				break
+			}
 		}
 	}
 }
@@ -163,34 +160,44 @@ func event(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, c := range clients {
-		if slices.ContainsFunc(c.filter, func(f FilterFunc) bool { return f(r.URL) }) {
-			continue
-		}
-
-		if err := c.api.Event(e.EventName, e.EventDuration, e.EventMeta, r, options); err != nil {
-			slog.Error("Error sending event", "err", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			break
+		if acceptRequest(c, r) {
+			if err := c.api.Event(e.EventName, e.EventDuration, e.EventMeta, r, options); err != nil {
+				slog.Error("Error sending event", "err", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				break
+			}
 		}
 	}
 }
 
 func session(w http.ResponseWriter, r *http.Request) {
 	for _, c := range clients {
-		if slices.ContainsFunc(c.filter, func(f FilterFunc) bool { return f(r.URL) }) {
-			continue
-		}
+		if acceptRequest(c, r) {
+			options := &pirsch.PageViewOptions{
+				IP:             getIP(r),
+				UserAgent:      r.Header.Get("User-Agent"),
+				AcceptLanguage: r.Header.Get("Accept-Language"),
+			}
 
-		options := &pirsch.PageViewOptions{
-			IP:             getIP(r),
-			UserAgent:      r.Header.Get("User-Agent"),
-			AcceptLanguage: r.Header.Get("Accept-Language"),
-		}
-
-		if err := c.api.Session(r, options); err != nil {
-			slog.Error("Error extending session", "err", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			break
+			if err := c.api.Session(r, options); err != nil {
+				slog.Error("Error extending session", "err", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				break
+			}
 		}
 	}
+}
+
+func acceptRequest(client client, r *http.Request) bool {
+	if len(client.filter) == 0 {
+		return true
+	}
+
+	for _, f := range client.filter {
+		if !f(r.URL) {
+			return false
+		}
+	}
+
+	return true
 }
