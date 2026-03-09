@@ -189,10 +189,6 @@ func session(w http.ResponseWriter, r *http.Request) {
 }
 
 func acceptRequest(client client, r *http.Request) bool {
-	if len(client.filter) == 0 {
-		return true
-	}
-
 	for _, f := range client.filter {
 		if !f(r.URL) {
 			return false
