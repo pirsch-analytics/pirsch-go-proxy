@@ -1,5 +1,9 @@
 ## Changelog
 
+## 2.5.1
+
+* fixed traffic filter logic
+
 ## 2.5.0
 
 * added client traffic filters to support using a single proxy for multiple sites
